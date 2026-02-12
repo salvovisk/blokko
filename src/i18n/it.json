@@ -1,0 +1,194 @@
+{
+  "common": {
+    "blokko": "BLOKKO",
+    "tagline": "PREVENTIVI DI PRECISIONE",
+    "signIn": "ACCEDI",
+    "register": "REGISTRATI",
+    "getStarted": "INIZIA",
+    "startBuilding": "INIZIA A CREARE",
+    "loading": "Caricamento...",
+    "save": "SALVA",
+    "cancel": "ANNULLA",
+    "delete": "ELIMINA",
+    "edit": "MODIFICA",
+    "close": "CHIUDI"
+  },
+  "landing": {
+    "hero": {
+      "title": "Crea Preventivi Professionali",
+      "subtitle": "Blocco per Blocco",
+      "description": "Un creatore di preventivi brutalmente semplice per freelancer, agenzie e consulenti. Componi preventivi con blocchi configurabili. Salva come modelli. Esporta PDF perfetti.",
+      "ctaPrimary": "INIZIA A CREARE",
+      "ctaSecondary": "ACCEDI"
+    },
+    "blocks": {
+      "header": "INTESTAZIONE",
+      "prices": "PREZZI",
+      "text": "TESTO",
+      "terms": "CONDIZIONI",
+      "block": "BLOCCO"
+    },
+    "features": {
+      "title": "FUNZIONALITÀ",
+      "blockSystem": {
+        "title": "SISTEMA A BLOCCHI",
+        "description": "Trascina e rilascia blocchi configurabili. Intestazione, tabelle prezzi, testo e condizioni. Componi preventivi come costruire con i LEGO."
+      },
+      "templates": {
+        "title": "MODELLI",
+        "description": "Salva preventivi di successo come modelli. Riutilizza strutture collaudate. Non ripartire mai da zero."
+      },
+      "pdfExport": {
+        "title": "ESPORTAZIONE PDF",
+        "description": "Genera PDF perfetti al pixel. Tipografia di precisione svizzera. Output professionale ogni volta."
+      },
+      "swissDesign": {
+        "title": "DESIGN SVIZZERO",
+        "description": "Interfaccia brutalista. Bordi marcati. Tipografia maiuscola. Nessuna decorazione inutile. Pura funzione."
+      }
+    },
+    "howItWorks": {
+      "title": "COME FUNZIONA",
+      "step1": {
+        "title": "AGGIUNGI BLOCCHI",
+        "description": "Inizia con una tela vuota. Aggiungi blocchi intestazione per info azienda. Tabelle prezzi per le voci. Blocchi testo per descrizioni. Blocchi condizioni."
+      },
+      "step2": {
+        "title": "CONFIGURA",
+        "description": "Personalizza ogni blocco. Imposta font, regola spaziature, modifica colori. Tutto è configurabile. Tutto ha uno scopo."
+      },
+      "step3": {
+        "title": "ESPORTA E RIUTILIZZA",
+        "description": "Esporta in PDF o salva come modello. La prossima volta, parti dal tuo modello. Itera, migliora, non perdere mai tempo."
+      }
+    },
+    "benefits": {
+      "title": "PERCHÉ BLOKKO?",
+      "description": "Smetti di lottare con i modelli Word. Smetti di copiare e incollare da vecchi preventivi. Smetti di perdere tempo sulla formattazione. Crea preventivi come gli sviluppatori creano software: con componenti modulari e riutilizzabili.",
+      "stats": {
+        "faster": "PIÙ VELOCE",
+        "reusable": "RIUTILIZZABILE",
+        "issues": "PROBLEMI DI FORMATTAZIONE",
+        "customization": "PERSONALIZZAZIONE"
+      }
+    },
+    "finalCta": {
+      "title": "INIZIA A CREARE",
+      "subtitle": "PREVENTIVI MIGLIORI OGGI",
+      "description": "Unisciti a freelancer e agenzie che hanno smesso di perdere tempo sulla formattazione e hanno iniziato a concentrarsi sulla conquista di progetti.",
+      "button": "INIZIA — È GRATIS"
+    },
+    "footer": {
+      "copyright": "COSTRUISCI BLOCCO PER BLOCCO.",
+      "templates": "MODELLI"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Accedi al tuo account",
+      "email": "INDIRIZZO EMAIL *",
+      "password": "PASSWORD *",
+      "submit": "ACCEDI",
+      "submitting": "ACCESSO IN CORSO...",
+      "noAccount": "Non hai un account?",
+      "registerLink": "Registrati qui",
+      "error": "Email o password non valide"
+    },
+    "register": {
+      "title": "Crea il tuo account",
+      "name": "NOME COMPLETO",
+      "email": "INDIRIZZO EMAIL *",
+      "password": "PASSWORD *",
+      "confirmPassword": "CONFERMA PASSWORD *",
+      "submit": "REGISTRATI",
+      "submitting": "CREAZIONE ACCOUNT...",
+      "hasAccount": "Hai già un account?",
+      "loginLink": "Accedi qui",
+      "errorPasswordMismatch": "Le password non corrispondono",
+      "errorPasswordLength": "La password deve essere di almeno 6 caratteri",
+      "errorGeneric": "Si è verificato un errore. Riprova."
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "quotes": "PREVENTIVI",
+      "templates": "MODELLI",
+      "settings": "IMPOSTAZIONI",
+      "logout": "ESCI"
+    },
+    "quotes": {
+      "title": "PREVENTIVI",
+      "subtitle": "Gestisci i tuoi preventivi",
+      "newQuote": "+ NUOVO PREVENTIVO",
+      "emptyTitle": "Nessun preventivo ancora",
+      "emptyDescription": "Crea il tuo primo preventivo per iniziare",
+      "emptyAction": "CREA PREVENTIVO",
+      "table": {
+        "number": "N. PREVENTIVO",
+        "title": "TITOLO",
+        "client": "CLIENTE",
+        "status": "STATO",
+        "updated": "AGGIORNATO",
+        "actions": "AZIONI"
+      },
+      "actions": {
+        "edit": "MODIFICA",
+        "duplicate": "DUPLICA",
+        "delete": "ELIMINA"
+      },
+      "status": {
+        "draft": "Bozza",
+        "sent": "Inviato",
+        "accepted": "Accettato",
+        "rejected": "Rifiutato",
+        "expired": "Scaduto"
+      },
+      "delete": {
+        "confirm": "Sei sicuro di voler eliminare questo preventivo?"
+      }
+    },
+    "templates": {
+      "title": "MODELLI",
+      "subtitle": "Modelli di preventivo riutilizzabili",
+      "emptyTitle": "Nessun modello ancora",
+      "emptyDescription": "Salva il tuo primo preventivo come modello per iniziare",
+      "emptyAction": "VAI AI PREVENTIVI",
+      "table": {
+        "name": "NOME",
+        "description": "DESCRIZIONE",
+        "blocks": "BLOCCHI",
+        "type": "TIPO",
+        "updated": "AGGIORNATO",
+        "actions": "AZIONI"
+      },
+      "type": {
+        "system": "SISTEMA",
+        "mine": "MIO"
+      },
+      "actions": {
+        "use": "USA",
+        "duplicate": "DUPLICA",
+        "rename": "RINOMINA",
+        "delete": "ELIMINA"
+      },
+      "delete": {
+        "confirm": "Sei sicuro di voler eliminare il modello"
+      }
+    },
+    "settings": {
+      "title": "IMPOSTAZIONI",
+      "subtitle": "Configura il tuo account e le preferenze",
+      "companyInfo": "Informazioni Azienda",
+      "comingSoon": "Pagina impostazioni in arrivo. Configura i dettagli della tua azienda, logo e preferenze qui."
+    },
+    "quoteEditor": {
+      "back": "← INDIETRO",
+      "save": "💾 SALVA",
+      "saving": "SALVATAGGIO...",
+      "preview": "👁 ANTEPRIMA",
+      "export": "⬇ ESPORTA PDF",
+      "saveAsTemplate": "📋 SALVA COME MODELLO",
+      "shortcuts": "Ctrl+Z (Annulla) • Ctrl+Y (Ripeti) • Ctrl+S (Salva)"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+interface BlokkoLogoProps {
+  size?: number;
+  className?: string;
+}
+
+export default function BlokkoLogo({ size = 40, className = '' }: BlokkoLogoProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* Black rectangle background */}
+      <rect width="100" height="100" fill="#000000" />
+
+      {/* White B letter - Swiss brutalist style */}
+      <path
+        d="M30 25 L30 75 L55 75 C62 75 67 72 67 65 C67 60 64 57 60 56 C63 55 65 52 65 48 C65 41 60 25 55 25 L30 25 Z M40 35 L52 35 C56 35 57 38 57 42 C57 46 56 48 52 48 L40 48 L40 35 Z M40 56 L54 56 C58 56 59 59 59 63 C59 67 58 68 54 68 L40 68 L40 56 Z"
+        fill="#FFFFFF"
+      />
+    </svg>
+  );
+}
+
+// Export a version for use in head/favicon
+export function BlokkoLogoIcon() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#000000" />
+      <path
+        d="M30 25 L30 75 L55 75 C62 75 67 72 67 65 C67 60 64 57 60 56 C63 55 65 52 65 48 C65 41 60 25 55 25 L30 25 Z M40 35 L52 35 C56 35 57 38 57 42 C57 46 56 48 52 48 L40 48 L40 35 Z M40 56 L54 56 C58 56 59 59 59 63 C59 67 58 68 54 68 L40 68 L40 56 Z"
+        fill="#FFFFFF"
+      />
+    </svg>
+  );
+}

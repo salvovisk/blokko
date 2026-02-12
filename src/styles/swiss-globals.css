@@ -1,0 +1,361 @@
+/**
+ * Swiss Precision - Global Styles
+ * PDF-optimized design system
+ */
+
+:root {
+  --swiss-black: #000000;
+  --swiss-white: #FFFFFF;
+  --swiss-gray: #666666;
+  --swiss-light-gray: #CCCCCC;
+  --swiss-very-light-gray: #F0F0F0;
+
+  --swiss-font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --swiss-mono-family: 'Courier New', Courier, monospace;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--swiss-font-family);
+  background: var(--swiss-white);
+  color: var(--swiss-black);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== SWISS BUTTON ===== */
+.swiss-btn {
+  padding: 12px 24px;
+  border: 2px solid var(--swiss-black);
+  background: transparent;
+  color: var(--swiss-black);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--swiss-font-family);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.swiss-btn:hover:not(:disabled) {
+  background: var(--swiss-very-light-gray);
+}
+
+.swiss-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.swiss-btn-primary {
+  background: var(--swiss-black);
+  color: var(--swiss-white);
+  border-color: var(--swiss-black);
+}
+
+.swiss-btn-primary:hover:not(:disabled) {
+  background: var(--swiss-gray);
+  border-color: var(--swiss-gray);
+}
+
+.swiss-btn-small {
+  padding: 8px 16px;
+  font-size: 11px;
+}
+
+.swiss-btn-large {
+  padding: 16px 32px;
+  font-size: 13px;
+}
+
+/* ===== SWISS INPUT ===== */
+.swiss-input {
+  padding: 12px 16px;
+  border: 2px solid var(--swiss-black);
+  background: var(--swiss-white);
+  color: var(--swiss-black);
+  font-size: 14px;
+  font-family: var(--swiss-font-family);
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.swiss-input:focus {
+  outline: none;
+  border-color: var(--swiss-gray);
+}
+
+.swiss-input::placeholder {
+  color: var(--swiss-gray);
+}
+
+.swiss-input:disabled {
+  background: var(--swiss-very-light-gray);
+  color: var(--swiss-gray);
+  cursor: not-allowed;
+}
+
+/* ===== SWISS SELECT ===== */
+.swiss-select {
+  padding: 12px 16px;
+  border: 2px solid var(--swiss-black);
+  background: var(--swiss-white);
+  color: var(--swiss-black);
+  font-size: 14px;
+  font-family: var(--swiss-font-family);
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.swiss-select:focus {
+  outline: none;
+  border-color: var(--swiss-gray);
+}
+
+/* ===== SWISS LABEL ===== */
+.swiss-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--swiss-gray);
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* ===== SWISS CARD ===== */
+.swiss-card {
+  background: var(--swiss-white);
+  border: 2px solid var(--swiss-black);
+  padding: var(--spacing-xl);
+}
+
+.swiss-card-outlined {
+  border: 1px solid var(--swiss-light-gray);
+}
+
+/* ===== SWISS TABLE ===== */
+.swiss-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--swiss-white);
+  border: 2px solid var(--swiss-black);
+}
+
+.swiss-table thead {
+  background: var(--swiss-black);
+  color: var(--swiss-white);
+}
+
+.swiss-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border-bottom: 2px solid var(--swiss-black);
+}
+
+.swiss-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--swiss-very-light-gray);
+}
+
+.swiss-table tbody tr:hover {
+  background: var(--swiss-very-light-gray);
+}
+
+.swiss-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== SWISS BADGE ===== */
+.swiss-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--swiss-black);
+  background: var(--swiss-white);
+  color: var(--swiss-black);
+}
+
+.swiss-badge-filled {
+  background: var(--swiss-black);
+  color: var(--swiss-white);
+}
+
+.swiss-badge-gray {
+  border-color: var(--swiss-gray);
+  color: var(--swiss-gray);
+}
+
+/* ===== SWISS HEADER ===== */
+.swiss-header {
+  border-bottom: 2px solid var(--swiss-black);
+  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.swiss-header-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.swiss-header-subtitle {
+  font-size: 13px;
+  color: var(--swiss-gray);
+  margin-top: 8px;
+}
+
+/* ===== SWISS SECTION ===== */
+.swiss-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.swiss-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--swiss-black);
+}
+
+/* ===== SWISS GRID ===== */
+.swiss-grid {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.swiss-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.swiss-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.swiss-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 768px) {
+  .swiss-grid-2,
+  .swiss-grid-3,
+  .swiss-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== SWISS FORM ===== */
+.swiss-form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.swiss-form-row {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.swiss-form-row > * {
+  flex: 1;
+}
+
+/* ===== SWISS DIVIDER ===== */
+.swiss-divider {
+  height: 2px;
+  background: var(--swiss-black);
+  margin: var(--spacing-lg) 0;
+  border: none;
+}
+
+.swiss-divider-light {
+  height: 1px;
+  background: var(--swiss-light-gray);
+}
+
+/* ===== SWISS EMPTY STATE ===== */
+.swiss-empty-state {
+  text-align: center;
+  padding: var(--spacing-3xl);
+  border: 2px solid var(--swiss-light-gray);
+  background: var(--swiss-white);
+}
+
+.swiss-empty-state-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+.swiss-empty-state-text {
+  font-size: 14px;
+  color: var(--swiss-gray);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* ===== SWISS LOADING ===== */
+.swiss-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3xl);
+  font-size: 14px;
+  color: var(--swiss-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ===== SWISS MONO (for numbers) ===== */
+.swiss-mono {
+  font-family: var(--swiss-mono-family);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== UTILITIES ===== */
+.swiss-text-uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.swiss-text-center {
+  text-align: center;
+}
+
+.swiss-text-right {
+  text-align: right;
+}
+
+.swiss-font-bold {
+  font-weight: 700;
+}
+
+.swiss-text-gray {
+  color: var(--swiss-gray);
+}

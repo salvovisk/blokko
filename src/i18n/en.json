@@ -1,0 +1,194 @@
+{
+  "common": {
+    "blokko": "BLOKKO",
+    "tagline": "PRECISION QUOTE BUILDER",
+    "signIn": "SIGN IN",
+    "register": "REGISTER",
+    "getStarted": "GET STARTED",
+    "startBuilding": "START BUILDING",
+    "loading": "Loading...",
+    "save": "SAVE",
+    "cancel": "CANCEL",
+    "delete": "DELETE",
+    "edit": "EDIT",
+    "close": "CLOSE"
+  },
+  "landing": {
+    "hero": {
+      "title": "Build Professional Quotes",
+      "subtitle": "Block by Block",
+      "description": "A brutally simple quote builder for freelancers, agencies, and consultants. Compose estimates with configurable blocks. Save as templates. Export perfect PDFs.",
+      "ctaPrimary": "START BUILDING",
+      "ctaSecondary": "SIGN IN"
+    },
+    "blocks": {
+      "header": "HEADER",
+      "prices": "PRICES",
+      "text": "TEXT",
+      "terms": "TERMS",
+      "block": "BLOCK"
+    },
+    "features": {
+      "title": "FEATURES",
+      "blockSystem": {
+        "title": "BLOCK SYSTEM",
+        "description": "Drag and drop configurable blocks. Header, price tables, text, and terms. Compose quotes like building with LEGO."
+      },
+      "templates": {
+        "title": "TEMPLATES",
+        "description": "Save successful quotes as templates. Reuse proven structures. Never start from scratch again."
+      },
+      "pdfExport": {
+        "title": "PDF EXPORT",
+        "description": "Generate pixel-perfect PDFs. Swiss precision typography. Professional output every time."
+      },
+      "swissDesign": {
+        "title": "SWISS DESIGN",
+        "description": "Brutalist interface. Bold borders. Uppercase typography. No unnecessary decoration. Pure function."
+      }
+    },
+    "howItWorks": {
+      "title": "HOW IT WORKS",
+      "step1": {
+        "title": "ADD BLOCKS",
+        "description": "Start with a blank canvas. Add header blocks for company info. Price tables for line items. Text blocks for descriptions. Terms blocks for conditions."
+      },
+      "step2": {
+        "title": "CONFIGURE",
+        "description": "Customize each block. Set fonts, adjust spacing, modify colors. Everything is configurable. Everything has purpose."
+      },
+      "step3": {
+        "title": "EXPORT & REUSE",
+        "description": "Export to PDF or save as template. Next time, start from your template. Iterate, improve, never waste time."
+      }
+    },
+    "benefits": {
+      "title": "WHY BLOKKO?",
+      "description": "Stop fighting with Word templates. Stop copying and pasting from old quotes. Stop wasting time on formatting. Build quotes the way developers build software: with modular, reusable components.",
+      "stats": {
+        "faster": "FASTER",
+        "reusable": "REUSABLE",
+        "issues": "FORMATTING ISSUES",
+        "customization": "CUSTOMIZATION"
+      }
+    },
+    "finalCta": {
+      "title": "START BUILDING",
+      "subtitle": "BETTER QUOTES TODAY",
+      "description": "Join freelancers and agencies who stopped wasting time on formatting and started focusing on winning projects.",
+      "button": "GET STARTED — IT'S FREE"
+    },
+    "footer": {
+      "copyright": "BUILD BLOCK BY BLOCK.",
+      "templates": "TEMPLATES"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "email": "EMAIL ADDRESS *",
+      "password": "PASSWORD *",
+      "submit": "SIGN IN",
+      "submitting": "SIGNING IN...",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Register here",
+      "error": "Invalid email or password"
+    },
+    "register": {
+      "title": "Create your account",
+      "name": "FULL NAME",
+      "email": "EMAIL ADDRESS *",
+      "password": "PASSWORD *",
+      "confirmPassword": "CONFIRM PASSWORD *",
+      "submit": "REGISTER",
+      "submitting": "CREATING ACCOUNT...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in here",
+      "errorPasswordMismatch": "Passwords do not match",
+      "errorPasswordLength": "Password must be at least 6 characters",
+      "errorGeneric": "An error occurred. Please try again."
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "quotes": "QUOTES",
+      "templates": "TEMPLATES",
+      "settings": "SETTINGS",
+      "logout": "LOGOUT"
+    },
+    "quotes": {
+      "title": "QUOTES",
+      "subtitle": "Manage your quotes",
+      "newQuote": "+ NEW QUOTE",
+      "emptyTitle": "No quotes yet",
+      "emptyDescription": "Create your first quote to get started",
+      "emptyAction": "CREATE QUOTE",
+      "table": {
+        "number": "QUOTE #",
+        "title": "TITLE",
+        "client": "CLIENT",
+        "status": "STATUS",
+        "updated": "UPDATED",
+        "actions": "ACTIONS"
+      },
+      "actions": {
+        "edit": "EDIT",
+        "duplicate": "DUPLICATE",
+        "delete": "DELETE"
+      },
+      "status": {
+        "draft": "Draft",
+        "sent": "Sent",
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "expired": "Expired"
+      },
+      "delete": {
+        "confirm": "Are you sure you want to delete this quote?"
+      }
+    },
+    "templates": {
+      "title": "TEMPLATES",
+      "subtitle": "Reusable quote templates",
+      "emptyTitle": "No templates yet",
+      "emptyDescription": "Save your first quote as a template to get started",
+      "emptyAction": "GO TO QUOTES",
+      "table": {
+        "name": "NAME",
+        "description": "DESCRIPTION",
+        "blocks": "BLOCKS",
+        "type": "TYPE",
+        "updated": "UPDATED",
+        "actions": "ACTIONS"
+      },
+      "type": {
+        "system": "SYSTEM",
+        "mine": "MINE"
+      },
+      "actions": {
+        "use": "USE",
+        "duplicate": "DUPLICATE",
+        "rename": "RENAME",
+        "delete": "DELETE"
+      },
+      "delete": {
+        "confirm": "Are you sure you want to delete the template"
+      }
+    },
+    "settings": {
+      "title": "SETTINGS",
+      "subtitle": "Configure your account and preferences",
+      "companyInfo": "Company Information",
+      "comingSoon": "Settings page coming soon. Configure your company details, logo, and preferences here."
+    },
+    "quoteEditor": {
+      "back": "← BACK",
+      "save": "💾 SAVE",
+      "saving": "SAVING...",
+      "preview": "👁 PREVIEW",
+      "export": "⬇ EXPORT PDF",
+      "saveAsTemplate": "📋 SAVE AS TEMPLATE",
+      "shortcuts": "Ctrl+Z (Undo) • Ctrl+Y (Redo) • Ctrl+S (Save)"
+    }
+  }
+}
