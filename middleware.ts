@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+import { requireCsrfToken } from './src/lib/csrf';
 
 // In-memory rate limiting store
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -39,8 +41,14 @@ const BLOCKED_USER_AGENTS = [
   'masscan',
 ];
 
-// Allowed routes (only home page and static assets)
-const ALLOWED_ROUTES = ['/', '/_next', '/favicon.svg', '/api/health'];
+// Public routes that don't require authentication
+const PUBLIC_ROUTES = ['/', '/_next', '/favicon.svg', '/api/health', '/api/auth', '/api/csrf', '/login', '/register'];
+
+// Protected API routes that require authentication
+const PROTECTED_API_ROUTES = ['/api/quotes', '/api/templates', '/api/user'];
+
+// Protected page routes
+const PROTECTED_PAGE_ROUTES = ['/dashboard', '/builder', '/quotes', '/templates', '/settings'];
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
@@ -73,17 +81,25 @@ function isBlockedUserAgent(userAgent: string): boolean {
   return BLOCKED_USER_AGENTS.some(blocked => ua.includes(blocked));
 }
 
-function shouldAllowRoute(pathname: string): boolean {
-  // Allow exact matches and prefixes
-  return ALLOWED_ROUTES.some(route => {
-    if (route.endsWith('*')) {
-      return pathname.startsWith(route.slice(0, -1));
-    }
+function isPublicRoute(pathname: string): boolean {
+  return PUBLIC_ROUTES.some(route => {
     return pathname === route || pathname.startsWith(route + '/');
   });
 }
 
-export function middleware(request: NextRequest) {
+function isProtectedApiRoute(pathname: string): boolean {
+  return PROTECTED_API_ROUTES.some(route => {
+    return pathname.startsWith(route);
+  });
+}
+
+function isProtectedPageRoute(pathname: string): boolean {
+  return PROTECTED_PAGE_ROUTES.some(route => {
+    return pathname === route || pathname.startsWith(route + '/');
+  });
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Get client IP (handles various proxy headers)
@@ -115,20 +131,67 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // 3. Redirect all non-allowed routes to home (except API routes which return 404)
-  if (!shouldAllowRoute(pathname)) {
-    // Block API routes completely
+  // 3. CSRF protection for protected API routes (state-changing methods)
+  if (isProtectedApiRoute(pathname)) {
+    const method = request.method;
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+      try {
+        await requireCsrfToken(request);
+      } catch (error) {
+        console.warn(`[SECURITY] CSRF validation failed: ${pathname} from ${ip}`);
+        return new NextResponse(
+          JSON.stringify({ error: 'Invalid CSRF token' }),
+          {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+    }
+  }
+
+  // 4. Authentication check for protected routes
+  if (isProtectedApiRoute(pathname) || isProtectedPageRoute(pathname)) {
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+
+    if (!token) {
+      // For API routes, return 401
+      if (isProtectedApiRoute(pathname)) {
+        console.warn(`[SECURITY] Unauthorized API access: ${pathname} from ${ip}`);
+        return new NextResponse(
+          JSON.stringify({ error: 'Unauthorized' }),
+          {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      // For page routes, redirect to login
+      console.log(`[AUTH] Redirecting to login: ${pathname} -> /login (IP: ${ip})`);
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  // 5. Block unknown routes
+  if (!isPublicRoute(pathname) && !isProtectedApiRoute(pathname) && !isProtectedPageRoute(pathname)) {
+    // Block unknown API routes
     if (pathname.startsWith('/api/')) {
       console.warn(`[SECURITY] Blocked API access: ${pathname} from ${ip}`);
       return new NextResponse('Not Found', { status: 404 });
     }
 
-    // Redirect other routes to home
+    // Redirect unknown pages to home
     console.log(`[REDIRECT] ${pathname} -> / (IP: ${ip})`);
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // 4. Add security headers
+  // 6. Add security headers
   const response = NextResponse.next();
 
   // Security headers
@@ -139,10 +202,29 @@ export function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
-  // Prevent clickjacking
-  response.headers.set('Content-Security-Policy',
-    "frame-ancestors 'self'"
-  );
+  // Content Security Policy
+  const cspDirectives = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-eval'", // Next.js requires unsafe-eval in dev mode
+    "style-src 'self' 'unsafe-inline'", // MUI uses inline styles
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' data:",
+    "connect-src 'self'",
+    "frame-ancestors 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+    "media-src 'self'",
+    "worker-src 'self' blob:",
+    "manifest-src 'self'",
+  ];
+
+  // In production, remove unsafe-eval
+  if (process.env.NODE_ENV === 'production') {
+    cspDirectives[1] = "script-src 'self'";
+  }
+
+  response.headers.set('Content-Security-Policy', cspDirectives.join('; '));
 
   // HTTPS enforcement (only in production)
   if (process.env.NODE_ENV === 'production') {

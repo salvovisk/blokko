@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 type BlockType = 'HEADER' | 'PRICES' | 'TEXT' | 'TERMS';
@@ -22,8 +22,17 @@ export default function BlockDemo() {
   const [canvasBlocks, setCanvasBlocks] = useState<Block[]>([]);
   const [draggedBlock, setDraggedBlock] = useState<BlockType | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   const availableBlocks: BlockType[] = ['HEADER', 'PRICES', 'TEXT', 'TERMS'];
+
+  // Detect mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleDragStart = (blockType: BlockType) => {
     setDraggedBlock(blockType);
@@ -71,6 +80,15 @@ export default function BlockDemo() {
     setCanvasBlocks(canvasBlocks.filter(block => block.id !== id));
   };
 
+  // Mobile: tap to add block
+  const handleMobileAdd = (blockType: BlockType) => {
+    const newBlock: Block = {
+      id: `${blockType}-${Date.now()}`,
+      type: blockType,
+    };
+    setCanvasBlocks([...canvasBlocks, newBlock]);
+  };
+
   return (
     <div
       style={{
@@ -94,14 +112,14 @@ export default function BlockDemo() {
         </h3>
         <p
           style={{
-            fontSize: '11px',
+            fontSize: 'clamp(10px, 2vw, 11px)',
             fontWeight: 600,
             letterSpacing: '0.12em',
             color: '#666',
             textTransform: 'uppercase',
           }}
         >
-          ← Drag blocks from left to right →
+          {isMobile ? '↓ TAP BLOCKS TO ADD ↓' : '← DRAG BLOCKS FROM LEFT TO RIGHT →'}
         </p>
       </div>
 
@@ -109,10 +127,10 @@ export default function BlockDemo() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '24px',
           border: '3px solid #000',
-          padding: '32px',
+          padding: isMobile ? '20px' : '32px',
           background: '#FAFAFA',
         }}
       >
@@ -135,24 +153,43 @@ export default function BlockDemo() {
             {availableBlocks.map((blockType) => (
               <div
                 key={blockType}
-                draggable
-                onDragStart={() => handleDragStart(blockType)}
-                onDragEnd={handleDragEnd}
+                draggable={!isMobile}
+                onDragStart={!isMobile ? () => handleDragStart(blockType) : undefined}
+                onDragEnd={!isMobile ? handleDragEnd : undefined}
+                onClick={isMobile ? () => handleMobileAdd(blockType) : undefined}
                 style={{
                   border: '3px solid #000',
                   padding: '16px',
                   background: '#FFF',
-                  cursor: 'grab',
+                  cursor: isMobile ? 'pointer' : 'grab',
                   transition: 'all 0.2s ease',
                   opacity: draggedBlock === blockType ? 0.5 : 1,
+                  minHeight: '44px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                  e.currentTarget.style.boxShadow = '4px 4px 0 #000';
+                  if (!isMobile) {
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                    e.currentTarget.style.boxShadow = '4px 4px 0 #000';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
+                  if (!isMobile) {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }
+                }}
+                onTouchStart={(e) => {
+                  if (isMobile) {
+                    e.currentTarget.style.background = '#F0F0F0';
+                  }
+                }}
+                onTouchEnd={(e) => {
+                  if (isMobile) {
+                    e.currentTarget.style.background = '#FFF';
+                  }
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
@@ -371,14 +408,17 @@ export default function BlockDemo() {
       <div
         style={{
           marginTop: '24px',
-          fontSize: '10px',
+          fontSize: 'clamp(9px, 2vw, 10px)',
           fontWeight: 600,
           letterSpacing: '0.12em',
           textAlign: 'center',
           color: '#999',
+          padding: '0 16px',
         }}
       >
-        THIS IS HOW EASY IT IS TO BUILD QUOTES WITH BLOKKO
+        {isMobile
+          ? 'TAP BLOCKS ABOVE TO ADD THEM TO YOUR QUOTE'
+          : 'THIS IS HOW EASY IT IS TO BUILD QUOTES WITH BLOKKO'}
       </div>
     </div>
   );

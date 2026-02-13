@@ -1,28 +1,46 @@
 # BLOKKO
 
+**Status**: 🚧 Pre-Launch Landing Page
+
 A professional quote builder that uses configurable blocks. Build professional quotes block by block with Swiss precision design.
 
-## Features
+## Current Version
 
-- ✅ Drag & drop quote builder
-- ✅ Block system (Header, Prices, Text, Terms)
-- ✅ PDF export functionality
-- ✅ Template system with system templates
-- ✅ User authentication (NextAuth)
+This repository contains the **pre-launch landing page** for BLOKKO. The full quote builder application is under development.
+
+### What's Live
+
+- ✅ Landing page with interactive block demo
 - ✅ Bilingual support (English/Italian)
 - ✅ Swiss brutalist design system
-- ✅ Security hardening (CSRF, rate limiting, input validation)
-- ✅ Auto-save functionality
+- ✅ Production-ready deployment
+- ✅ Security hardening (rate limiting, bot blocking, security headers)
+
+### Coming Soon
+
+- 🔜 Full drag & drop quote builder
+- 🔜 Block system (Header, Prices, Text, Terms)
+- 🔜 PDF export functionality
+- 🔜 Template system
+- 🔜 User authentication
+- 🔜 Database integration
 
 ## Tech Stack
 
-- **Frontend**: Next.js 16 (App Router), React 18, Material-UI, TypeScript
-- **State Management**: Zustand
-- **Database**: SQLite (development), PostgreSQL (production recommended for scale)
-- **ORM**: Prisma
-- **Authentication**: NextAuth (JWT sessions, bcryptjs)
-- **PDF Generation**: jsPDF
-- **Security**: CSRF protection, Zod validation, rate limiting
+**Current (Landing Page):**
+
+- Next.js 16 (App Router)
+- React 18
+- Material-UI (Theme/Typography)
+- TypeScript
+
+**Future (Full App):**
+
+- PostgreSQL database
+- Prisma ORM
+- NextAuth authentication
+- PDF generation
+- Drag & drop system
 
 ## Development
 
@@ -34,78 +52,22 @@ A professional quote builder that uses configurable blocks. Build professional q
 ### Installation
 
 ```bash
-# Clone repository
-git clone <repo-url>
-cd blokko
-
 # Install dependencies
 npm install
 
-# Setup environment
-cp .env.example .env
-# Edit .env with your configuration
-
-# Initialize database
-npm run db:push
-
-# Seed demo data (optional)
-npm run db:seed
-
 # Start development server
 npm run dev
-```
 
-### Commands
+# Build for production
+npm run build
 
-```bash
-npm run dev          # Start dev server
-npm run build        # Production build
-npm run lint         # ESLint (next lint)
-npm run db:push      # Sync Prisma schema to database
-npm run db:studio    # Open Prisma Studio (database GUI)
-npm run db:seed      # Seed demo data (tsx prisma/seed.ts)
+# Start production server
+npm start
 ```
 
 ### Environment Variables
 
-Required: `DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`. See `.env.example`.
-
-## Production Deployment
-
-### Prerequisites
-- Docker and Docker Compose
-- Domain with SSL certificate
-- Nginx (for reverse proxy)
-
-### Quick Deploy
-
-1. **Clone and setup**:
-   ```bash
-   git clone <repo-url>
-   cd blokko
-   git checkout auth-enabled
-   ```
-
-2. **Configure environment**:
-   ```bash
-   cp .env.production.example .env.production
-   # Edit with production values:
-   # - NEXTAUTH_URL (your domain)
-   # - NEXTAUTH_SECRET (generate with: openssl rand -base64 32)
-   ```
-
-3. **Build and run**:
-   ```bash
-   docker-compose --env-file .env.production up -d --build
-   ```
-
-4. **Initialize database**:
-   ```bash
-   docker-compose exec blokko npx prisma db push
-   docker-compose exec blokko npm run db:seed  # Optional: demo templates
-   ```
-
-See [PRODUCTION-DEPLOY.md](./PRODUCTION-DEPLOY.md) for detailed deployment guide.
+For the landing page, no environment variables are required. See `.env.example` for future configuration when the full app launches.
 
 ## Project Structure
 
@@ -113,67 +75,51 @@ See [PRODUCTION-DEPLOY.md](./PRODUCTION-DEPLOY.md) for detailed deployment guide
 blokko/
 ├── src/
 │   ├── app/
-│   │   ├── (auth)/              # Auth pages (login, register)
-│   │   ├── (dashboard)/         # Protected pages
-│   │   │   ├── builder/         # Quote builder
-│   │   │   ├── dashboard/       # Dashboard
-│   │   │   ├── quotes/          # Quotes list
-│   │   │   ├── settings/        # User settings
-│   │   │   └── templates/       # Templates
-│   │   └── api/                 # API routes
-│   │       ├── auth/            # NextAuth + registration
-│   │       ├── csrf/            # CSRF token
-│   │       ├── health/          # Health check
-│   │       ├── quotes/          # Quotes CRUD
-│   │       └── templates/       # Templates CRUD
+│   │   ├── layout.tsx          # Root layout
+│   │   ├── page.tsx            # Landing page
+│   │   └── api/health/         # Health check endpoint
 │   ├── components/
-│   │   ├── blocks/              # Block components
-│   │   ├── landing/             # Landing page
-│   │   ├── logo/                # Logo component
-│   │   └── ui/                  # UI components
+│   │   ├── landing/            # BlockDemo component
+│   │   ├── logo/               # BlokkoLogo component
+│   │   ├── ui/                 # Theme & providers
+│   │   └── LanguageSwitcher.tsx
 │   ├── contexts/
-│   │   └── LanguageContext.tsx  # i18n context
-│   ├── i18n/                    # Translations (en/it)
+│   │   └── LanguageContext.tsx # i18n context
+│   ├── i18n/                   # Translations (en/it)
 │   ├── lib/
-│   │   ├── auth.ts              # NextAuth config
-│   │   ├── logger.ts            # Logging utility
-│   │   ├── prisma.ts            # Prisma client
-│   │   ├── theme.ts             # MUI theme
-│   │   └── validations.ts       # Zod schemas
-│   ├── stores/
-│   │   └── builder-store.ts     # Zustand store
-│   ├── styles/                  # Global styles
-│   └── types/                   # TypeScript types
-├── prisma/
-│   ├── schema.prisma            # Database schema
-│   └── seed.ts                  # Seed script
-├── middleware.ts                # Rate limiting, auth, security
-├── docker-compose.yml           # Docker configuration
-├── Dockerfile                   # Docker build
-└── next.config.js              # Next.js config
+│   │   └── theme.ts            # MUI theme config
+│   └── styles/                 # Global styles
+├── middleware.ts               # Security & route protection
+├── next.config.js             # Next.js configuration
+└── public/                    # Static assets
+```
+
+## Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for security features and deployment instructions.
+
+### Quick Deploy
+
+**Vercel:**
+
+```bash
+npm i -g vercel
+vercel --prod
+```
+
+**Cloudflare Pages:**
+
+```bash
+npx wrangler pages deploy .next
 ```
 
 ## Security Features
 
-- ✅ CSRF protection for all mutations
 - ✅ Rate limiting (30 req/min per IP)
-- ✅ Comprehensive input validation (Zod schemas)
-- ✅ Bot blocking (malicious user agents)
-- ✅ Security headers (CSP, HSTS, X-Frame-Options)
-- ✅ Strong password requirements (8+ chars, complexity)
-- ✅ Email normalization (case-insensitive)
-- ✅ Session timeout (7 days with refresh)
-- ✅ Database indexes for performance
-- ✅ Structured logging with sensitive data sanitization
-
-## Documentation
-
-- [CLAUDE.md](./CLAUDE.md) - Developer guidance for Claude Code
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deployment best practices
-- [DOCKER.md](./DOCKER.md) - Docker deployment guide
-- [PRODUCTION-DEPLOY.md](./PRODUCTION-DEPLOY.md) - Comprehensive production deployment
-- [SECURITY-IMPROVEMENTS.md](./SECURITY-IMPROVEMENTS.md) - Security documentation
-- [MIGRATION-GUIDE.md](./MIGRATION-GUIDE.md) - API changes documentation
+- ✅ Bot blocking (scrapers, malicious crawlers)
+- ✅ Route protection (only `/` and `/_next/*` allowed)
+- ✅ Security headers (CSP, HSTS, X-Frame-Options, etc.)
+- ✅ Health check endpoint (`/api/health`)
 
 ## License
 

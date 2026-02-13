@@ -6,7 +6,7 @@
     "register": "REGISTRATI",
     "getStarted": "INIZIA",
     "startBuilding": "INIZIA A CREARE",
-    "loading": "Caricamento...",
+    "loading": "CARICAMENTO...",
     "save": "SALVA",
     "cancel": "ANNULLA",
     "delete": "ELIMINA",
@@ -45,6 +45,10 @@
       "swissDesign": {
         "title": "DESIGN SVIZZERO",
         "description": "Interfaccia brutalista. Bordi marcati. Tipografia maiuscola. Nessuna decorazione inutile. Pura funzione."
+      },
+      "blockLibrary": {
+        "title": "11+ BLOCCHI",
+        "description": "Ricca libreria di blocchi: intestazioni, prezzi, condizioni, FAQ, tabelle, timeline, contatti, sconti, pagamenti e firme. Tutto ciò che ti serve."
       }
     },
     "howItWorks": {
@@ -85,28 +89,46 @@
   },
   "auth": {
     "login": {
-      "title": "Accedi al tuo account",
-      "email": "INDIRIZZO EMAIL *",
-      "password": "PASSWORD *",
-      "submit": "ACCEDI",
-      "submitting": "ACCESSO IN CORSO...",
+      "title": "Login",
+      "subtitle": "Bentornato. Inserisci le tue credenziali per continuare.",
+      "email": "Indirizzo Email",
+      "emailPlaceholder": "tuaemail@esempio.it",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Accedi",
+      "submitting": "Accesso in corso...",
       "noAccount": "Non hai un account?",
-      "registerLink": "Registrati qui",
-      "error": "Email o password non valide"
+      "createAccount": "Crea Account",
+      "backToHome": "← Torna alla Home",
+      "secureAuth": "Autenticazione sicura powered by NextAuth",
+      "error": "Email o password non valide",
+      "emailRequired": "L'email è obbligatoria",
+      "emailInvalid": "Formato email non valido",
+      "passwordRequired": "La password è obbligatoria"
     },
     "register": {
-      "title": "Crea il tuo account",
-      "name": "NOME COMPLETO",
-      "email": "INDIRIZZO EMAIL *",
-      "password": "PASSWORD *",
-      "confirmPassword": "CONFERMA PASSWORD *",
-      "submit": "REGISTRATI",
-      "submitting": "CREAZIONE ACCOUNT...",
+      "title": "Crea Account",
+      "subtitle": "Unisciti a BLOKKO e inizia a creare preventivi professionali.",
+      "name": "Nome Completo",
+      "namePlaceholder": "Mario Rossi",
+      "email": "Indirizzo Email",
+      "emailPlaceholder": "tuaemail@esempio.it",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Crea Account",
+      "submitting": "Creazione Account...",
       "hasAccount": "Hai già un account?",
-      "loginLink": "Accedi qui",
-      "errorPasswordMismatch": "Le password non corrispondono",
-      "errorPasswordLength": "La password deve essere di almeno 6 caratteri",
-      "errorGeneric": "Si è verificato un errore. Riprova."
+      "signIn": "Accedi",
+      "backToHome": "← Torna alla Home",
+      "nameRequired": "Il nome è obbligatorio",
+      "nameTooLong": "Il nome deve essere di 100 caratteri o meno",
+      "nameNoNumbers": "Il nome non può contenere numeri",
+      "emailRequired": "L'email è obbligatoria",
+      "emailInvalid": "Formato email non valido",
+      "passwordMinLength": "La password deve essere di almeno 8 caratteri",
+      "passwordLowercase": "Deve contenere almeno una lettera minuscola",
+      "passwordUppercase": "Deve contenere almeno una lettera maiuscola",
+      "passwordNumber": "Deve contenere almeno un numero"
     }
   },
   "dashboard": {
@@ -116,19 +138,28 @@
       "settings": "IMPOSTAZIONI",
       "logout": "ESCI"
     },
+    "templateDescriptions": {
+      "template-basic": "Modello minimo con intestazione, prezzi e condizioni",
+      "template-detailed": "Modello completo con introduzione e prossimi passi",
+      "template-service": "Modello orientato ai servizi con descrizione dettagliata",
+      "template-project": "Proposta progetto completa con timeline, contatti team e FAQ",
+      "template-payment-plan": "Preventivo con piano di pagamento dettagliato e sconto pagamento anticipato",
+      "template-consulting": "Preventivo consulenza professionale con tabella deliverable e sezione firma",
+      "template-agency": "Proposta agenzia completa che mostra tutti i blocchi disponibili"
+    },
     "quotes": {
-      "title": "PREVENTIVI",
+      "title": "I MIEI PREVENTIVI",
       "subtitle": "Gestisci i tuoi preventivi",
       "newQuote": "+ NUOVO PREVENTIVO",
       "emptyTitle": "Nessun preventivo ancora",
-      "emptyDescription": "Crea il tuo primo preventivo per iniziare",
-      "emptyAction": "CREA PREVENTIVO",
+      "emptyDescription": "Non hai ancora creato nessun preventivo.",
+      "emptyAction": "CREA IL TUO PRIMO PREVENTIVO",
       "table": {
         "number": "N. PREVENTIVO",
         "title": "TITOLO",
         "client": "CLIENTE",
         "status": "STATO",
-        "updated": "AGGIORNATO",
+        "updated": "ULTIMO AGGIORNAMENTO",
         "actions": "AZIONI"
       },
       "actions": {
@@ -142,9 +173,6 @@
         "accepted": "Accettato",
         "rejected": "Rifiutato",
         "expired": "Scaduto"
-      },
-      "delete": {
-        "confirm": "Sei sicuro di voler eliminare questo preventivo?"
       }
     },
     "templates": {
@@ -170,16 +198,48 @@
         "duplicate": "DUPLICA",
         "rename": "RINOMINA",
         "delete": "ELIMINA"
-      },
-      "delete": {
-        "confirm": "Sei sicuro di voler eliminare il modello"
       }
     },
     "settings": {
       "title": "IMPOSTAZIONI",
       "subtitle": "Configura il tuo account e le preferenze",
-      "companyInfo": "Informazioni Azienda",
-      "comingSoon": "Pagina impostazioni in arrivo. Configura i dettagli della tua azienda, logo e preferenze qui."
+      "profile": {
+        "title": "PROFILO",
+        "emailLabel": "EMAIL (SOLA LETTURA)",
+        "nameLabel": "NOME",
+        "namePlaceholder": "Il tuo nome",
+        "updateButton": "AGGIORNA PROFILO",
+        "updating": "AGGIORNAMENTO..."
+      },
+      "password": {
+        "title": "CAMBIA PASSWORD",
+        "currentLabel": "PASSWORD ATTUALE",
+        "currentPlaceholder": "Inserisci password attuale",
+        "newLabel": "NUOVA PASSWORD",
+        "newPlaceholder": "Inserisci nuova password (min 6 caratteri)",
+        "confirmLabel": "CONFERMA NUOVA PASSWORD",
+        "confirmPlaceholder": "Conferma nuova password",
+        "changeButton": "CAMBIA PASSWORD",
+        "changing": "CAMBIO IN CORSO..."
+      },
+      "language": {
+        "title": "LINGUA",
+        "label": "LINGUA DELL'INTERFACCIA",
+        "description": "Scegli la tua lingua preferita per l'interfaccia",
+        "english": "English",
+        "italian": "Italiano"
+      },
+      "messages": {
+        "nameEmpty": "Il nome non può essere vuoto",
+        "profileUpdated": "Profilo aggiornato con successo",
+        "profileFailed": "Aggiornamento profilo fallito",
+        "passwordRequired": "Tutti i campi password sono obbligatori",
+        "passwordMismatch": "Le nuove password non corrispondono",
+        "passwordLength": "La nuova password deve essere di almeno 6 caratteri",
+        "passwordChanged": "Password cambiata con successo",
+        "passwordIncorrect": "La password attuale non è corretta",
+        "passwordFailed": "Cambio password fallito"
+      }
     },
     "quoteEditor": {
       "back": "← INDIETRO",
@@ -190,5 +250,131 @@
       "saveAsTemplate": "📋 SALVA COME MODELLO",
       "shortcuts": "Ctrl+Z (Annulla) • Ctrl+Y (Ripeti) • Ctrl+S (Salva)"
     }
+  },
+  "builder": {
+    "canvas": {
+      "emptyState": "Trascina i blocchi qui per iniziare",
+      "emptyStateHint": "Trascina i blocchi dalla barra laterale",
+      "dropToAdd": "RILASCIA PER AGGIUNGERE BLOCCO"
+    },
+    "sidebar": {
+      "title": "LIBRERIA BLOCCHI",
+      "dragInstruction": "Trascina i blocchi sulla tela",
+      "tapInstruction": "Tocca per aggiungere blocchi",
+      "helpTextDesktop": "Clicca e trascina i blocchi sulla tela per costruire il tuo preventivo.",
+      "helpTextMobile": "Tocca qualsiasi blocco qui sopra per aggiungerlo al tuo preventivo.",
+      "blocks": {
+        "header": {
+          "label": "Intestazione",
+          "description": "Informazioni azienda e cliente con numero preventivo e data"
+        },
+        "prices": {
+          "label": "Prezzi",
+          "description": "Tabella prezzi dettagliata con calcoli automatici e tasse"
+        },
+        "text": {
+          "label": "Testo",
+          "description": "Contenuto testuale libero con titolo opzionale per descrizioni"
+        },
+        "terms": {
+          "label": "Condizioni",
+          "description": "Lista di termini e condizioni con voci personalizzabili"
+        },
+        "faq": {
+          "label": "FAQ",
+          "description": "Domande frequenti con risposte"
+        },
+        "table": {
+          "label": "Tabella",
+          "description": "Tabella dati generica per informazioni strutturate"
+        },
+        "timeline": {
+          "label": "Timeline",
+          "description": "Pianificazione progetto con milestone e deliverable"
+        },
+        "contact": {
+          "label": "Contatto",
+          "description": "Informazioni membri del team e contatti chiave"
+        },
+        "discount": {
+          "label": "Sconto",
+          "description": "Offerte speciali e prezzi promozionali"
+        },
+        "payment": {
+          "label": "Pagamento",
+          "description": "Condizioni di pagamento, scadenzario e coordinate bancarie"
+        },
+        "signature": {
+          "label": "Firma",
+          "description": "Approvazione e sottoscrizione cliente"
+        }
+      }
+    },
+    "toolbar": {
+      "titlePlaceholder": "PREVENTIVO SENZA TITOLO",
+      "save": "SALVA",
+      "saveShortcut": "SALVA (CTRL+S)",
+      "saving": "SALVATAGGIO...",
+      "preview": "ANTEPRIMA",
+      "previewMobile": "VEDI",
+      "exportPdf": "ESPORTA PDF",
+      "exportPdfMobile": "PDF",
+      "exporting": "ESPORTAZIONE...",
+      "saveTemplate": "SALVA COME MODELLO",
+      "saveTemplateMobile": "MODELLO",
+      "clear": "CANCELLA"
+    },
+    "saveTemplateModal": {
+      "title": "SALVA COME MODELLO",
+      "nameLabel": "NOME MODELLO *",
+      "namePlaceholder": "es., Preventivo Servizio Standard",
+      "descriptionLabel": "DESCRIZIONE (OPZIONALE)",
+      "descriptionPlaceholder": "Breve descrizione di questo modello...",
+      "errorRequired": "Il nome del modello è obbligatorio",
+      "errorFailed": "Salvataggio modello fallito",
+      "cancel": "ANNULLA",
+      "save": "SALVA MODELLO",
+      "saving": "SALVATAGGIO..."
+    },
+    "confirmClear": {
+      "title": "Cancella Editor",
+      "message": "Sei sicuro di voler cancellare l'editor? Questo rimuoverà tutti i blocchi e non può essere annullato.",
+      "confirm": "Cancella Tutto",
+      "cancel": "Annulla"
+    },
+    "messages": {
+      "titleRequired": "Inserisci un titolo per il preventivo",
+      "quoteSaved": "Preventivo salvato con successo",
+      "quoteSaveFailed": "Salvataggio preventivo fallito. Riprova.",
+      "quoteLoadFailed": "Caricamento preventivo fallito. Riprova.",
+      "previewFailed": "Generazione anteprima fallita. Riprova.",
+      "pdfExported": "PDF esportato con successo",
+      "pdfExportFailed": "Esportazione PDF fallita. Riprova.",
+      "templateSaved": "Modello salvato con successo"
+    }
+  },
+  "confirmDialog": {
+    "deleteQuote": {
+      "title": "Elimina Preventivo",
+      "message": "Sei sicuro di voler eliminare \"{title}\"? Questa azione non può essere annullata.",
+      "confirm": "Elimina",
+      "cancel": "Annulla"
+    },
+    "deleteTemplate": {
+      "title": "Elimina Modello",
+      "message": "Sei sicuro di voler eliminare \"{name}\"? Questa azione non può essere annullata.",
+      "confirm": "Elimina",
+      "cancel": "Annulla"
+    }
+  },
+  "messages": {
+    "quotesLoadFailed": "Caricamento preventivi fallito. Riprova.",
+    "quoteDeleted": "Preventivo eliminato con successo",
+    "quoteDeleteFailed": "Eliminazione preventivo fallita. Riprova.",
+    "templatesLoadFailed": "Caricamento modelli fallito. Riprova.",
+    "templateRenamed": "Modello rinominato con successo",
+    "templateRenameFailed": "Rinomina modello fallita",
+    "templateDeleted": "Modello eliminato con successo",
+    "templateDeleteFailed": "Eliminazione modello fallita"
   }
 }
