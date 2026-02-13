@@ -44,6 +44,9 @@ COPY --from=builder /app/.next/static ./.next/static
 # Set correct permissions
 RUN chown -R nextjs:nodejs /app
 
+# Create data directory for SQLite (before switching user)
+RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
+
 # Switch to non-root user
 USER nextjs
 
@@ -53,5 +56,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start the application
-CMD ["node", "server.js"]
+# Run schema push on container start and start application
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node server.js"]

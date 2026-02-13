@@ -5,26 +5,30 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: blokko-landing
-    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - PORT=3000
-    # Optional: Add resource limits
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL:-file:/app/data/production.db}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+    volumes:
+      - blokko_data:/app/data
+    restart: unless-stopped
     deploy:
       resources:
         limits:
           cpus: '1'
           memory: 512M
         reservations:
-          cpus: '0.5'
           memory: 256M
-    # Optional: Health check
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+volumes:
+  blokko_data:
+    driver: local
