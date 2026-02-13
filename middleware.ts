@@ -39,8 +39,8 @@ const BLOCKED_USER_AGENTS = [
   'masscan',
 ];
 
-// Allowed routes (only home page and static assets)
-const ALLOWED_ROUTES = ['/', '/_next', '/favicon.svg', '/api/health'];
+// Allowed routes (home page, auth pages, dashboard, and static assets)
+const ALLOWED_ROUTES = ['/', '/_next', '/favicon.svg', '/api/health', '/api/auth', '/login', '/register', '/dashboard'];
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();

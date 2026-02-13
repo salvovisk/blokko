@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import BlockDemo from '@/components/landing/BlockDemo';
+import { BuilderIcon, TemplatesIcon, QuotesIcon, SettingsIcon } from '@/components/icons/GeometricIcons';
 
 export default function LandingPage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -185,22 +186,22 @@ export default function LandingPage() {
               {
                 title: t.landing.features.blockSystem.title,
                 desc: t.landing.features.blockSystem.description,
-                icon: '◼',
+                icon: <BuilderIcon />,
               },
               {
                 title: t.landing.features.templates.title,
                 desc: t.landing.features.templates.description,
-                icon: '▦',
+                icon: <TemplatesIcon />,
               },
               {
                 title: t.landing.features.pdfExport.title,
                 desc: t.landing.features.pdfExport.description,
-                icon: '▣',
+                icon: <QuotesIcon />,
               },
               {
                 title: t.landing.features.swissDesign.title,
                 desc: t.landing.features.swissDesign.description,
-                icon: '▨',
+                icon: <SettingsIcon />,
               },
             ].map((feature, i) => (
               <div
