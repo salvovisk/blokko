@@ -15,12 +15,20 @@ import { BlockActionRail } from './BlockActionRail';
 import { BlockFocusToolbar } from './BlockFocusToolbar';
 import { CommandPalette, Command } from './CommandPalette';
 import { useBlockKeyboardShortcuts } from '@/hooks/useBlockKeyboardShortcuts';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Dynamically import block components
 const HeaderBlock = dynamic(() => import('@/components/blocks/HeaderBlock'));
 const PricesBlock = dynamic(() => import('@/components/blocks/PricesBlock'));
 const TextBlock = dynamic(() => import('@/components/blocks/TextBlock'));
 const TermsBlock = dynamic(() => import('@/components/blocks/TermsBlock'));
+const FaqBlock = dynamic(() => import('@/components/blocks/FaqBlock'));
+const TableBlock = dynamic(() => import('@/components/blocks/TableBlock'));
+const TimelineBlock = dynamic(() => import('@/components/blocks/TimelineBlock'));
+const ContactBlock = dynamic(() => import('@/components/blocks/ContactBlock'));
+const DiscountBlock = dynamic(() => import('@/components/blocks/DiscountBlock'));
+const PaymentBlock = dynamic(() => import('@/components/blocks/PaymentBlock'));
+const SignatureBlock = dynamic(() => import('@/components/blocks/SignatureBlock'));
 
 interface SortableBlockWrapperProps {
   block: Block;
@@ -338,6 +346,20 @@ function BlockRenderer({ block, isActive }: BlockRendererProps) {
       return <TextBlock block={block} isActive={isActive} />;
     case 'TERMS':
       return <TermsBlock block={block} isActive={isActive} />;
+    case 'FAQ':
+      return <FaqBlock block={block} isActive={isActive} />;
+    case 'TABLE':
+      return <TableBlock block={block} isActive={isActive} />;
+    case 'TIMELINE':
+      return <TimelineBlock block={block} isActive={isActive} />;
+    case 'CONTACT':
+      return <ContactBlock block={block} isActive={isActive} />;
+    case 'DISCOUNT':
+      return <DiscountBlock block={block} isActive={isActive} />;
+    case 'PAYMENT':
+      return <PaymentBlock block={block} isActive={isActive} />;
+    case 'SIGNATURE':
+      return <SignatureBlock block={block} isActive={isActive} />;
     default:
       return <div>Unknown block type</div>;
   }
@@ -357,6 +379,7 @@ export default function BuilderCanvas() {
     id: 'canvas-droppable',
   });
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const { t } = useLanguage();
 
   const isEmpty = !blocks || blocks.length === 0;
   const activeBlockIndex = blocks?.findIndex((b) => b.id === activeBlockId) ?? -1;
@@ -391,6 +414,55 @@ export default function BuilderCanvas() {
       category: 'Add',
       keywords: ['create', 'new', 'terms', 'conditions'],
       action: () => addBlock('TERMS'),
+    },
+    {
+      id: 'add-faq',
+      label: 'Add FAQ Block',
+      category: 'Add',
+      keywords: ['create', 'new', 'faq', 'questions', 'answers'],
+      action: () => addBlock('FAQ'),
+    },
+    {
+      id: 'add-table',
+      label: 'Add Table Block',
+      category: 'Add',
+      keywords: ['create', 'new', 'table', 'data', 'grid'],
+      action: () => addBlock('TABLE'),
+    },
+    {
+      id: 'add-timeline',
+      label: 'Add Timeline Block',
+      category: 'Add',
+      keywords: ['create', 'new', 'timeline', 'schedule', 'milestones'],
+      action: () => addBlock('TIMELINE'),
+    },
+    {
+      id: 'add-contact',
+      label: 'Add Contact Block',
+      category: 'Add',
+      keywords: ['create', 'new', 'contact', 'team', 'people'],
+      action: () => addBlock('CONTACT'),
+    },
+    {
+      id: 'add-discount',
+      label: 'Add Discount Block',
+      category: 'Add',
+      keywords: ['create', 'new', 'discount', 'offer', 'promotion'],
+      action: () => addBlock('DISCOUNT'),
+    },
+    {
+      id: 'add-payment',
+      label: 'Add Payment Block',
+      category: 'Add',
+      keywords: ['create', 'new', 'payment', 'banking', 'terms'],
+      action: () => addBlock('PAYMENT'),
+    },
+    {
+      id: 'add-signature',
+      label: 'Add Signature Block',
+      category: 'Add',
+      keywords: ['create', 'new', 'signature', 'approval', 'sign'],
+      action: () => addBlock('SIGNATURE'),
     },
   ];
 
@@ -552,7 +624,7 @@ export default function BuilderCanvas() {
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
-              {isOver ? 'DROP TO ADD BLOCK' : 'Drop blocks here to start building'}
+              {isOver ? t.builder.canvas.dropToAdd : t.builder.canvas.emptyState}
             </p>
             {!isOver && (
               <p
@@ -565,7 +637,7 @@ export default function BuilderCanvas() {
                   fontWeight: 600,
                 }}
               >
-                Drag blocks from the sidebar
+                {t.builder.canvas.emptyStateHint}
               </p>
             )}
           </div>

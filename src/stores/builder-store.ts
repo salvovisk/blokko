@@ -1,6 +1,21 @@
 import { create } from 'zustand';
 import { nanoid } from 'nanoid';
-import type { Block, BlockType, HeaderBlockData, PricesBlockData, TextBlockData, TermsBlockData, SaveState } from '@/types/blocks';
+import type {
+  Block,
+  BlockType,
+  HeaderBlockData,
+  PricesBlockData,
+  TextBlockData,
+  TermsBlockData,
+  FaqBlockData,
+  TableBlockData,
+  TimelineBlockData,
+  ContactBlockData,
+  DiscountBlockData,
+  PaymentBlockData,
+  SignatureBlockData,
+  SaveState
+} from '@/types/blocks';
 
 interface BuilderState {
   blocks: Block[];
@@ -21,6 +36,8 @@ interface BuilderState {
   loadQuote: (quoteId: string, title: string, blocks: Block[]) => void;
   clearBuilder: () => void;
   duplicateBlock: (id: string) => void;
+  loadTemplate: (templateId: string, templateName: string, blocks: Block[]) => void;
+  saveAsTemplate: (name: string, description?: string) => Promise<{ success: boolean; templateId?: string; error?: string }>;
 }
 
 const createDefaultBlockData = (type: BlockType): Block['data'] => {
@@ -59,6 +76,123 @@ const createDefaultBlockData = (type: BlockType): Block['data'] => {
         ],
       } as TermsBlockData;
 
+    case 'FAQ':
+      return {
+        title: 'Frequently Asked Questions',
+        faqs: [
+          {
+            id: nanoid(),
+            question: 'What\'s included in the price?',
+            answer: 'The price includes all services listed in the pricing section above.',
+          },
+          {
+            id: nanoid(),
+            question: 'How long will this take?',
+            answer: 'The estimated timeline is detailed in the project schedule.',
+          },
+        ],
+        showNumbering: true,
+      } as FaqBlockData;
+
+    case 'TABLE':
+      return {
+        title: 'Data Table',
+        headers: ['Item', 'Description', 'Value'],
+        rows: [
+          ['Row 1', 'Sample data', '100'],
+          ['Row 2', 'Sample data', '200'],
+        ],
+        footers: [],
+        alignment: ['left', 'left', 'right'],
+        showBorders: true,
+      } as TableBlockData;
+
+    case 'TIMELINE':
+      return {
+        title: 'Project Timeline',
+        startDate: 'Upon approval',
+        milestones: [
+          {
+            id: nanoid(),
+            phase: 'Discovery & Planning',
+            duration: '1 week',
+            deliverables: 'Project plan, wireframes',
+            dueDate: '',
+          },
+          {
+            id: nanoid(),
+            phase: 'Development',
+            duration: '3 weeks',
+            deliverables: 'Working prototype',
+            dueDate: '',
+          },
+        ],
+        notes: 'Timeline assumes timely client feedback and approvals.',
+      } as TimelineBlockData;
+
+    case 'CONTACT':
+      return {
+        title: 'Your Team',
+        contacts: [
+          {
+            id: nanoid(),
+            name: 'John Doe',
+            role: 'Project Manager',
+            email: 'john@company.com',
+            phone: '',
+            bio: '',
+          },
+        ],
+        layout: 'list',
+      } as ContactBlockData;
+
+    case 'DISCOUNT':
+      return {
+        title: 'Special Offer',
+        offerType: 'percentage',
+        discountValue: 10,
+        description: 'Book before the end of the month and save 10%',
+        validUntil: '',
+        conditions: ['Valid for new clients only', 'Full payment upfront'],
+        highlightColor: '',
+      } as DiscountBlockData;
+
+    case 'PAYMENT':
+      return {
+        title: 'Payment Terms',
+        schedule: [
+          {
+            id: nanoid(),
+            milestone: 'Deposit (upon signing)',
+            percentage: 50,
+            amount: 0,
+          },
+          {
+            id: nanoid(),
+            milestone: 'Final payment (upon delivery)',
+            percentage: 50,
+            amount: 0,
+          },
+        ],
+        bankingInfo: {
+          accountName: 'Your Company Name',
+          accountNumber: 'XXXX-XXXX-XXXX',
+          routingNumber: 'XXXXXXX',
+          swiftCode: '',
+        },
+        acceptedMethods: ['Bank Transfer', 'PayPal', 'Credit Card'],
+        notes: 'Payment due within 7 days of invoice.',
+      } as PaymentBlockData;
+
+    case 'SIGNATURE':
+      return {
+        title: 'Client Approval',
+        approvalText: 'By signing below, you accept the terms and pricing outlined in this quote.',
+        signatureLabel: 'Client Signature',
+        dateLabel: 'Date',
+        showCompanySignature: false,
+      } as SignatureBlockData;
+
     default:
       return {} as any;
   }
@@ -83,7 +217,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     } as Block;
 
     set((state) => {
-      const blocks = [...state.blocks];
+      const blocks = [...(state.blocks || [])];
       if (index !== undefined) {
         blocks.splice(index, 0, newBlock);
       } else {
@@ -179,7 +313,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
 
   moveBlock: (fromIndex, toIndex) => {
     set((state) => {
-      const blocks = [...state.blocks];
+      const blocks = [...(state.blocks || [])];
       const [removed] = blocks.splice(fromIndex, 1);
       blocks.splice(toIndex, 0, removed);
       return { blocks };
@@ -213,7 +347,8 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   },
 
   duplicateBlock: (id) => {
-    const block = get().blocks.find((b) => b.id === id);
+    const blocks = get().blocks || [];
+    const block = blocks.find((b) => b.id === id);
     if (block) {
       const newBlock = {
         ...block,
@@ -221,9 +356,57 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
         saveState: 'idle' as SaveState,
       };
       set((state) => ({
-        blocks: [...state.blocks, newBlock],
+        blocks: [...(state.blocks || []), newBlock],
         activeBlockId: newBlock.id,
       }));
+    }
+  },
+
+  loadTemplate: (templateId, templateName, blocks) => {
+    // Generate fresh block IDs to avoid conflicts
+    const blocksWithNewIds = (blocks || []).map((block) => ({
+      ...block,
+      id: nanoid(),
+      saveState: 'idle' as SaveState,
+    }));
+
+    set({
+      blocks: blocksWithNewIds,
+      quoteTitle: `${templateName} - Copy`,
+      quoteId: null, // New quote, not editing existing
+      activeBlockId: null,
+    });
+  },
+
+  saveAsTemplate: async (name, description) => {
+    const { blocks } = get();
+
+    // Validate blocks
+    if (!blocks || blocks.length === 0) {
+      return { success: false, error: 'No blocks to save as template' };
+    }
+
+    try {
+      const response = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          description: description || null,
+          blocks,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        return { success: false, error: error.error || 'Failed to save template' };
+      }
+
+      const template = await response.json();
+      return { success: true, templateId: template.id };
+    } catch (error) {
+      console.error('Save template error:', error);
+      return { success: false, error: 'Network error' };
     }
   },
 }));

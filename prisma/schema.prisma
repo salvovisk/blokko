@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -19,6 +19,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   quotes        Quote[]
+  templates     Template[]
 
   @@map("users")
 }
@@ -29,11 +30,27 @@ model Quote {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title       String
   description String?
-  content     Json     // Stores block structure
+  content     String   // Stores block structure as JSON string
   status      String   @default("draft") // draft, sent, accepted, rejected
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("quotes")
   @@index([userId])
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  content     String   // JSON blocks (same format as Quote.content)
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("templates")
+  @@index([userId])
+  @@index([isSystem])
 }

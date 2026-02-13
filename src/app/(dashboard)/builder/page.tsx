@@ -18,16 +18,23 @@ import { BlockType } from '@/types/blocks';
 import BuilderSidebar from '@/components/builder/BuilderSidebar';
 import BuilderCanvas from '@/components/builder/BuilderCanvas';
 import BuilderToolbar from '@/components/builder/BuilderToolbar';
+import SaveTemplateModal from '@/components/modals/SaveTemplateModal';
+import Toast from '@/components/ui/Toast';
+import { useToast } from '@/hooks/useToast';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { generatePDF, downloadPDF, getPDFDataURL } from '@/lib/pdf-generator';
 
 export default function BuilderPage() {
-  const { blocks, addBlock, moveBlock, quoteTitle, quoteId, loadQuote } = useBuilderStore();
+  const { t } = useLanguage();
+  const { blocks, addBlock, moveBlock, quoteTitle, quoteId, loadQuote, saveAsTemplate } = useBuilderStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const { toast, showToast, hideToast } = useToast();
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -48,6 +55,21 @@ export default function BuilderPage() {
 
   const sensors = useSensors(mouseSensor, touchSensor);
 
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: 's',
+      ctrl: true,
+      handler: (e) => {
+        e.preventDefault();
+        if (!isSaving) {
+          handleSave();
+        }
+      },
+      description: 'Save quote',
+    },
+  ]);
+
   // Load quote from URL param on mount
   useEffect(() => {
     const id = searchParams.get('id');
@@ -64,21 +86,15 @@ export default function BuilderPage() {
       }
       const quote = await response.json();
       loadQuote(quote.id, quote.title, quote.blocks);
-      showMessage('success', 'Quote loaded successfully');
     } catch (error) {
       console.error('Error loading quote:', error);
-      showMessage('error', 'Failed to load quote');
+      showToast(t.builder.messages.quoteLoadFailed, 'error');
     }
-  };
-
-  const showMessage = (type: 'success' | 'error', text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3000);
   };
 
   const handleSave = async () => {
     if (!quoteTitle.trim()) {
-      showMessage('error', 'Please enter a quote title');
+      showToast(t.builder.messages.titleRequired, 'error');
       return;
     }
 
@@ -115,14 +131,14 @@ export default function BuilderPage() {
       // Update store with saved quote ID
       if (!quoteId) {
         loadQuote(savedQuote.id, savedQuote.title, savedQuote.blocks);
-        // Update URL with quote ID
-        router.push(`/builder?id=${savedQuote.id}`);
+        // Update URL with quote ID without navigation
+        router.replace(`/builder?id=${savedQuote.id}`, { scroll: false });
       }
 
-      showMessage('success', 'Quote saved successfully');
+      showToast(t.builder.messages.quoteSaved, 'success');
     } catch (error) {
       console.error('Error saving quote:', error);
-      showMessage('error', 'Failed to save quote');
+      showToast(t.builder.messages.quoteSaveFailed, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -140,7 +156,7 @@ export default function BuilderPage() {
       setShowPreview(true);
     } catch (error) {
       console.error('Error generating preview:', error);
-      showMessage('error', 'Failed to generate preview');
+      showToast(t.builder.messages.previewFailed, 'error');
     }
   };
 
@@ -154,12 +170,22 @@ export default function BuilderPage() {
 
       const filename = `${quoteTitle.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       downloadPDF(pdfBlob, filename);
-      showMessage('success', 'PDF exported successfully');
+      showToast(t.builder.messages.pdfExported, 'success');
     } catch (error) {
       console.error('Error exporting PDF:', error);
-      showMessage('error', 'Failed to export PDF');
+      showToast(t.builder.messages.pdfExportFailed, 'error');
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleSaveAsTemplate = async (name: string, description?: string) => {
+    const result = await saveAsTemplate(name, description);
+
+    if (result.success) {
+      showToast(t.builder.messages.templateSaved, 'success');
+    } else {
+      throw new Error(result.error || 'Failed to save template');
     }
   };
 
@@ -176,7 +202,22 @@ export default function BuilderPage() {
     // Check if dragging a new block from sidebar
     if (active.data.current?.isNew) {
       const blockType = active.data.current?.type as BlockType;
-      addBlock(blockType);
+
+      // Find the index to insert at based on the drop target
+      let insertIndex: number | undefined;
+
+      if (over.id === 'canvas-droppable') {
+        // Dropped on empty canvas - add at end
+        insertIndex = undefined;
+      } else {
+        // Dropped on an existing block - insert after that block
+        const overIndex = blocks.findIndex((b) => b.id === over.id);
+        if (overIndex !== -1) {
+          insertIndex = overIndex + 1;
+        }
+      }
+
+      addBlock(blockType, insertIndex);
       return;
     }
 
@@ -198,11 +239,18 @@ export default function BuilderPage() {
     // Check if it's a new block from sidebar
     if (typeof activeId === 'string' && activeId.startsWith('block-')) {
       const blockType = activeId.replace('block-', '') as BlockType;
-      const blockIcons = {
+      const blockIcons: Record<BlockType, string> = {
         HEADER: '◼',
         PRICES: '▦',
         TEXT: '▣',
         TERMS: '▨',
+        FAQ: '◉',
+        TABLE: '▥',
+        TIMELINE: '◫',
+        CONTACT: '◬',
+        DISCOUNT: '◭',
+        PAYMENT: '◮',
+        SIGNATURE: '◯',
       };
       return { type: blockType, icon: blockIcons[blockType], isNew: true };
     }
@@ -210,11 +258,18 @@ export default function BuilderPage() {
     // It's an existing block being reordered
     const block = blocks.find((b) => b.id === activeId);
     if (block) {
-      const blockIcons = {
+      const blockIcons: Record<BlockType, string> = {
         HEADER: '◼',
         PRICES: '▦',
         TEXT: '▣',
         TERMS: '▨',
+        FAQ: '◉',
+        TABLE: '▥',
+        TIMELINE: '◫',
+        CONTACT: '◬',
+        DISCOUNT: '◭',
+        PAYMENT: '◮',
+        SIGNATURE: '◯',
       };
       return { type: block.type, icon: blockIcons[block.type as BlockType], isNew: false };
     }
@@ -226,36 +281,23 @@ export default function BuilderPage() {
 
   return (
     <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
+
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 100px)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
           {/* Toolbar */}
           <BuilderToolbar
             onSave={handleSave}
             onPreview={handlePreview}
             onExportPDF={handleExportPDF}
+            onSaveAsTemplate={() => setShowTemplateModal(true)}
             isSaving={isSaving}
             isExporting={isExporting}
           />
-
-          {/* Success/Error Message */}
-          {message && (
-            <div
-              style={{
-                padding: '12px 24px',
-                backgroundColor: message.type === 'success' ? '#10B981' : '#EF4444',
-                color: '#FFFFFF',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                fontSize: '14px',
-              }}
-            >
-              {message.text}
-            </div>
-          )}
 
           {/* Main Builder Area */}
           <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
@@ -368,26 +410,40 @@ export default function BuilderPage() {
           <div
             style={{
               backgroundColor: '#FFFFFF',
-              padding: '20px',
-              borderRadius: '8px',
-              maxWidth: '90%',
-              maxHeight: '90%',
-              overflow: 'auto',
+              border: '3px solid #000000',
+              padding: '24px',
+              width: 'calc(100vw - 80px)',
+              height: 'calc(100vh - 80px)',
+              maxWidth: '1400px',
+              maxHeight: '900px',
+              display: 'flex',
+              flexDirection: 'column',
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>PDF Preview</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '16px', borderBottom: '3px solid #000000' }}>
+              <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>PDF PREVIEW</h2>
               <button
                 onClick={() => setShowPreview(false)}
                 style={{
-                  padding: '8px 16px',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
+                  padding: '12px 24px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
                   backgroundColor: '#000000',
                   color: '#FFFFFF',
-                  border: 'none',
+                  border: '3px solid #000000',
                   cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#FFFFFF';
+                  e.currentTarget.style.color = '#000000';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#000000';
+                  e.currentTarget.style.color = '#FFFFFF';
                 }}
               >
                 CLOSE
@@ -396,15 +452,22 @@ export default function BuilderPage() {
             <iframe
               src={previewURL}
               style={{
-                width: '800px',
-                height: '600px',
-                border: '2px solid #000000',
+                flex: 1,
+                width: '100%',
+                border: '3px solid #000000',
               }}
               title="PDF Preview"
             />
           </div>
         </div>
       )}
+
+      {/* Save Template Modal */}
+      <SaveTemplateModal
+        open={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+        onSave={handleSaveAsTemplate}
+      />
     </>
   );
 }

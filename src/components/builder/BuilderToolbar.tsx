@@ -2,12 +2,15 @@
 
 import { useBuilderStore } from '@/stores/builder-store';
 import { useState, useEffect } from 'react';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface BuilderToolbarProps {
   onSave?: () => void;
   onPreview?: () => void;
   onExportPDF?: () => void;
   onClear?: () => void;
+  onSaveAsTemplate?: () => void;
   isSaving?: boolean;
   isExporting?: boolean;
 }
@@ -17,11 +20,14 @@ export default function BuilderToolbar({
   onPreview,
   onExportPDF,
   onClear,
+  onSaveAsTemplate,
   isSaving = false,
   isExporting = false,
 }: BuilderToolbarProps) {
+  const { t } = useLanguage();
   const { quoteTitle, setQuoteTitle, clearBuilder } = useBuilderStore();
   const [isMobile, setIsMobile] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Detect mobile
   useEffect(() => {
@@ -32,25 +38,41 @@ export default function BuilderToolbar({
   }, []);
 
   const handleClear = () => {
-    if (window.confirm('Are you sure you want to clear the builder? This will remove all blocks.')) {
-      clearBuilder();
-      onClear?.();
-    }
+    setShowClearConfirm(true);
+  };
+
+  const confirmClear = () => {
+    clearBuilder();
+    onClear?.();
+    setShowClearConfirm(false);
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
-        alignItems: isMobile ? 'stretch' : 'center',
-        gap: isMobile ? '12px' : '16px',
-        padding: isMobile ? '12px 16px' : '16px 24px',
-        backgroundColor: '#FFFFFF',
-        borderBottom: '3px solid #000000',
-        minHeight: isMobile ? 'auto' : '72px',
-      }}
-    >
+    <>
+      {showClearConfirm && (
+        <ConfirmDialog
+          title={t.builder.confirmClear.title}
+          message={t.builder.confirmClear.message}
+          confirmText={t.builder.confirmClear.confirm}
+          cancelText={t.builder.confirmClear.cancel}
+          type="danger"
+          onConfirm={confirmClear}
+          onCancel={() => setShowClearConfirm(false)}
+        />
+      )}
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'stretch' : 'center',
+          gap: isMobile ? '12px' : '16px',
+          padding: isMobile ? '12px 16px' : '16px 24px',
+          backgroundColor: '#FFFFFF',
+          borderBottom: '3px solid #000000',
+          minHeight: isMobile ? 'auto' : '72px',
+        }}
+      >
       {/* Title Input */}
       <input
         type="text"
@@ -68,7 +90,7 @@ export default function BuilderToolbar({
           letterSpacing: '0.5px',
           minHeight: isMobile ? '44px' : 'auto',
         }}
-        placeholder="UNTITLED QUOTE"
+        placeholder={t.builder.toolbar.titlePlaceholder}
       />
 
       {/* Buttons Container */}
@@ -111,7 +133,7 @@ export default function BuilderToolbar({
             }
           }}
         >
-          {isSaving ? 'SAVING...' : 'SAVE'}
+          {isSaving ? t.builder.toolbar.saving : isMobile ? t.builder.toolbar.save : t.builder.toolbar.saveShortcut}
         </button>
 
         {/* Preview Button */}
@@ -140,7 +162,7 @@ export default function BuilderToolbar({
             e.currentTarget.style.color = '#000000';
           }}
         >
-          {isMobile ? 'VIEW' : 'PREVIEW'}
+          {isMobile ? t.builder.toolbar.previewMobile : t.builder.toolbar.preview}
         </button>
 
         {/* Export PDF Button */}
@@ -175,7 +197,36 @@ export default function BuilderToolbar({
             }
           }}
         >
-          {isExporting ? (isMobile ? 'EXPORTING...' : 'EXPORTING...') : (isMobile ? 'PDF' : 'EXPORT PDF')}
+          {isExporting ? t.builder.toolbar.exporting : (isMobile ? t.builder.toolbar.exportPdfMobile : t.builder.toolbar.exportPdf)}
+        </button>
+
+        {/* Save as Template Button */}
+        <button
+          onClick={onSaveAsTemplate}
+          style={{
+            flex: isMobile ? '1 1 calc(50% - 4px)' : 'none',
+            padding: isMobile ? '12px 16px' : '10px 20px',
+            fontSize: isMobile ? '11px' : '14px',
+            fontWeight: 'bold',
+            textTransform: 'uppercase',
+            backgroundColor: '#FFFFFF',
+            color: '#10B981',
+            border: '2px solid #10B981',
+            cursor: 'pointer',
+            letterSpacing: '0.5px',
+            transition: 'all 0.2s',
+            minHeight: isMobile ? '44px' : 'auto',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#10B981';
+            e.currentTarget.style.color = '#FFFFFF';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#FFFFFF';
+            e.currentTarget.style.color = '#10B981';
+          }}
+        >
+          {isMobile ? t.builder.toolbar.saveTemplateMobile : t.builder.toolbar.saveTemplate}
         </button>
 
         {/* Clear Button */}
@@ -204,9 +255,10 @@ export default function BuilderToolbar({
             e.currentTarget.style.color = '#DC2626';
           }}
         >
-          CLEAR
+          {t.builder.toolbar.clear}
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

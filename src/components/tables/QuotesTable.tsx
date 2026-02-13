@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Quote {
   id: string;
@@ -28,6 +29,7 @@ const STATUS_COLORS: Record<string, { border: string; bg: string; color: string 
 };
 
 export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTableProps) {
+  const { t } = useLanguage();
   const [sortColumn, setSortColumn] = useState<SortColumn>('updatedAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
@@ -103,7 +105,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
       <div style={{ border: '3px dashed #CCC', padding: '60px', textAlign: 'center', background: '#FAFAFA' }}>
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>▦</div>
         <p style={{ fontSize: '16px', color: '#666' }}>
-          No quotes found. Create your first quote to get started.
+          {t.dashboard.quotes.emptyDescription}
         </p>
       </div>
     );
@@ -168,7 +170,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
                   e.currentTarget.style.background = '#000';
                 }}
               >
-                EDIT
+                {t.dashboard.quotes.actions.edit}
               </button>
               <button
                 onClick={() => onDelete(quote.id)}
@@ -194,7 +196,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
                   e.currentTarget.style.color = '#DC2626';
                 }}
               >
-                DELETE
+                {t.dashboard.quotes.actions.delete}
               </button>
             </div>
           </div>
@@ -231,7 +233,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
                 e.currentTarget.style.background = '#000';
               }}
             >
-              TITLE {renderSortArrow('title')}
+              {t.dashboard.quotes.table.title} {renderSortArrow('title')}
             </th>
             <th
               onClick={() => handleSort('status')}
@@ -256,7 +258,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
                 e.currentTarget.style.background = '#000';
               }}
             >
-              STATUS {renderSortArrow('status')}
+              {t.dashboard.quotes.table.status} {renderSortArrow('status')}
             </th>
             <th
               onClick={() => handleSort('updatedAt')}
@@ -281,7 +283,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
                 e.currentTarget.style.background = '#000';
               }}
             >
-              LAST UPDATED {renderSortArrow('updatedAt')}
+              {t.dashboard.quotes.table.updated} {renderSortArrow('updatedAt')}
             </th>
             <th
               style={{
@@ -297,7 +299,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
                 width: '200px',
               }}
             >
-              ACTIONS
+              {t.dashboard.quotes.table.actions}
             </th>
           </tr>
         </thead>
@@ -369,7 +371,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
                       e.currentTarget.style.color = '#000';
                     }}
                   >
-                    EDIT
+                    {t.dashboard.quotes.actions.edit}
                   </button>
                   <button
                     onClick={() => onDelete(quote.id)}
@@ -394,7 +396,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
                       e.currentTarget.style.color = '#DC2626';
                     }}
                   >
-                    DELETE
+                    {t.dashboard.quotes.actions.delete}
                   </button>
                 </div>
               </td>

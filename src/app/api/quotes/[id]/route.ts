@@ -45,7 +45,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(quote, { status: 200 });
+    return NextResponse.json({ ...quote, blocks: JSON.parse(quote.content) }, { status: 200 });
   } catch (error) {
     console.error('Error fetching quote:', error);
     return NextResponse.json(
@@ -105,11 +105,11 @@ export async function PUT(
       data: {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
-        ...(blocks !== undefined && { blocks }),
+        ...(blocks !== undefined && { content: JSON.stringify(blocks) }),
       },
     });
 
-    return NextResponse.json(updatedQuote, { status: 200 });
+    return NextResponse.json({ ...updatedQuote, blocks: JSON.parse(updatedQuote.content) }, { status: 200 });
   } catch (error) {
     console.error('Error updating quote:', error);
     return NextResponse.json(

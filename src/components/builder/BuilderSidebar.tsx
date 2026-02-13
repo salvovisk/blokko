@@ -5,6 +5,7 @@ import type { BlockType } from '@/types/blocks';
 import { useEffect, useState } from 'react';
 import { useBuilderStore } from '@/stores/builder-store';
 import { Tooltip } from '@mui/material';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Hook to detect mobile
 const useIsMobile = () => {
@@ -149,6 +150,7 @@ function DraggableBlock({ type, icon, label, description, isMobile, onMobileTap 
 }
 
 export default function BuilderSidebar() {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
   const { addBlock } = useBuilderStore();
@@ -157,26 +159,68 @@ export default function BuilderSidebar() {
     {
       type: 'HEADER',
       icon: '◼',
-      label: 'Header',
-      description: 'Company and client information with quote number and date'
+      label: t.builder.sidebar.blocks.header.label,
+      description: t.builder.sidebar.blocks.header.description
     },
     {
       type: 'PRICES',
       icon: '▦',
-      label: 'Prices',
-      description: 'Itemized pricing table with automatic calculations and tax'
+      label: t.builder.sidebar.blocks.prices.label,
+      description: t.builder.sidebar.blocks.prices.description
     },
     {
       type: 'TEXT',
       icon: '▣',
-      label: 'Text',
-      description: 'Free-form text content with optional title for descriptions'
+      label: t.builder.sidebar.blocks.text.label,
+      description: t.builder.sidebar.blocks.text.description
     },
     {
       type: 'TERMS',
       icon: '▨',
-      label: 'Terms',
-      description: 'Terms and conditions list with customizable items'
+      label: t.builder.sidebar.blocks.terms.label,
+      description: t.builder.sidebar.blocks.terms.description
+    },
+    {
+      type: 'FAQ',
+      icon: '◉',
+      label: t.builder.sidebar.blocks.faq?.label || 'FAQ',
+      description: t.builder.sidebar.blocks.faq?.description || 'Questions and answers'
+    },
+    {
+      type: 'TABLE',
+      icon: '▥',
+      label: t.builder.sidebar.blocks.table?.label || 'TABLE',
+      description: t.builder.sidebar.blocks.table?.description || 'Data table'
+    },
+    {
+      type: 'TIMELINE',
+      icon: '◫',
+      label: t.builder.sidebar.blocks.timeline?.label || 'TIMELINE',
+      description: t.builder.sidebar.blocks.timeline?.description || 'Project schedule'
+    },
+    {
+      type: 'CONTACT',
+      icon: '◬',
+      label: t.builder.sidebar.blocks.contact?.label || 'CONTACT',
+      description: t.builder.sidebar.blocks.contact?.description || 'Team members'
+    },
+    {
+      type: 'DISCOUNT',
+      icon: '◭',
+      label: t.builder.sidebar.blocks.discount?.label || 'DISCOUNT',
+      description: t.builder.sidebar.blocks.discount?.description || 'Special offer'
+    },
+    {
+      type: 'PAYMENT',
+      icon: '◮',
+      label: t.builder.sidebar.blocks.payment?.label || 'PAYMENT',
+      description: t.builder.sidebar.blocks.payment?.description || 'Payment terms'
+    },
+    {
+      type: 'SIGNATURE',
+      icon: '◯',
+      label: t.builder.sidebar.blocks.signature?.label || 'SIGNATURE',
+      description: t.builder.sidebar.blocks.signature?.description || 'Client approval'
     },
   ];
 
@@ -284,7 +328,7 @@ export default function BuilderSidebar() {
               margin: 0,
             }}
           >
-            BLOCK LIBRARY
+            {t.builder.sidebar.title}
           </h2>
           <p
             style={{
@@ -295,7 +339,7 @@ export default function BuilderSidebar() {
               letterSpacing: '0.3px',
             }}
           >
-            {isMobile ? 'Tap to add blocks' : 'Drag blocks to canvas'}
+            {isMobile ? t.builder.sidebar.tapInstruction : t.builder.sidebar.dragInstruction}
           </p>
         </div>
 
@@ -357,8 +401,8 @@ export default function BuilderSidebar() {
           }}
         >
           {isMobile
-            ? 'Tap any block above to add it to your quote.'
-            : 'Click and drag blocks to the canvas to build your quote.'}
+            ? t.builder.sidebar.helpTextMobile
+            : t.builder.sidebar.helpTextDesktop}
         </p>
       </div>
     </div>

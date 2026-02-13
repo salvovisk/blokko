@@ -16,6 +16,13 @@ const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   PRICES: 'Prices',
   TEXT: 'Text',
   TERMS: 'Terms & Conditions',
+  FAQ: 'FAQ',
+  TABLE: 'Table',
+  TIMELINE: 'Timeline',
+  CONTACT: 'Contact',
+  DISCOUNT: 'Discount',
+  PAYMENT: 'Payment',
+  SIGNATURE: 'Signature',
 };
 
 const SAVE_STATE_CONFIG: Record<SaveState, { label: string; color: string }> = {

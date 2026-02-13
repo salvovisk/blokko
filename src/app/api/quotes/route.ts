@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(quotes, { status: 200 });
+    const parsed = quotes.map((q) => ({ ...q, blocks: JSON.parse(q.content) }));
+    return NextResponse.json(parsed, { status: 200 });
   } catch (error) {
     console.error('Error fetching quotes:', error);
     return NextResponse.json(
@@ -74,12 +75,12 @@ export async function POST(req: NextRequest) {
       data: {
         title,
         description: description || '',
-        content: blocks || [],
+        content: JSON.stringify(blocks || []),
         userId: user.id,
       },
     });
 
-    return NextResponse.json(quote, { status: 201 });
+    return NextResponse.json({ ...quote, blocks: JSON.parse(quote.content) }, { status: 201 });
   } catch (error) {
     console.error('Error creating quote:', error);
     return NextResponse.json(

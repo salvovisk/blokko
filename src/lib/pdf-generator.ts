@@ -1,5 +1,18 @@
 import { jsPDF } from 'jspdf';
-import type { Block, HeaderBlockData, PricesBlockData, TextBlockData, TermsBlockData } from '@/types/blocks';
+import type {
+  Block,
+  HeaderBlockData,
+  PricesBlockData,
+  TextBlockData,
+  TermsBlockData,
+  FaqBlockData,
+  TableBlockData,
+  TimelineBlockData,
+  ContactBlockData,
+  DiscountBlockData,
+  PaymentBlockData,
+  SignatureBlockData
+} from '@/types/blocks';
 
 export interface PDFOptions {
   title: string;
@@ -249,6 +262,363 @@ export function generatePDF(options: PDFOptions): Blob {
         });
 
         yPosition += 5;
+        break;
+      }
+
+      case 'FAQ': {
+        const data = block.data as FaqBlockData;
+        checkPageBreak(20);
+
+        // Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text(data.title || 'FAQ', margin, yPosition);
+        yPosition += 7;
+
+        // FAQ items
+        (data.faqs || []).forEach((faq, index) => {
+          checkPageBreak(15);
+
+          // Question
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10);
+          const questionPrefix = data.showNumbering ? `Q${index + 1}: ` : '';
+          const questionHeight = addText(questionPrefix + faq.question, margin, yPosition, contentWidth, 10);
+          yPosition += questionHeight + 2;
+
+          // Answer
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          const answerHeight = addText(faq.answer, margin + 5, yPosition, contentWidth - 5, 9);
+          yPosition += answerHeight + 5;
+        });
+
+        yPosition += 5;
+        break;
+      }
+
+      case 'TABLE': {
+        const data = block.data as TableBlockData;
+        if (data.headers.length === 0) break;
+
+        checkPageBreak(20);
+
+        // Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text(data.title || 'Table', margin, yPosition);
+        yPosition += 7;
+
+        const colWidth = contentWidth / data.headers.length;
+        const tableTop = yPosition;
+
+        // Header row
+        doc.setFillColor(0, 0, 0);
+        doc.rect(margin, yPosition, contentWidth, 7, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+
+        data.headers.forEach((header, i) => {
+          const x = margin + i * colWidth + 2;
+          doc.text(header, x, yPosition + 5, { align: data.alignment[i] || 'left', maxWidth: colWidth - 4 });
+        });
+        yPosition += 7;
+
+        // Data rows
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        data.rows.forEach((row, rowIndex) => {
+          if (rowIndex % 2 === 0) {
+            doc.setFillColor(245, 245, 245);
+            doc.rect(margin, yPosition, contentWidth, 6, 'F');
+          }
+
+          row.forEach((cell, i) => {
+            const x = margin + i * colWidth + 2;
+            doc.text(cell, x, yPosition + 4, { align: data.alignment[i] || 'left', maxWidth: colWidth - 4 });
+          });
+          yPosition += 6;
+        });
+
+        // Table border
+        if (data.showBorders) {
+          doc.setLineWidth(0.3);
+          doc.rect(margin, tableTop, contentWidth, yPosition - tableTop);
+        }
+
+        yPosition += 5;
+        break;
+      }
+
+      case 'TIMELINE': {
+        const data = block.data as TimelineBlockData;
+        checkPageBreak(20);
+
+        // Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text(data.title || 'Timeline', margin, yPosition);
+        yPosition += 7;
+
+        // Start date
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(`Start: ${data.startDate}`, margin, yPosition);
+        yPosition += 6;
+
+        // Milestones
+        (data.milestones || []).forEach((milestone) => {
+          checkPageBreak(15);
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10);
+          doc.text(`• ${milestone.phase}`, margin + 2, yPosition);
+          yPosition += 5;
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.text(`Duration: ${milestone.duration}`, margin + 5, yPosition);
+          if (milestone.dueDate) {
+            doc.text(`Due: ${milestone.dueDate}`, margin + 50, yPosition);
+          }
+          yPosition += 5;
+
+          if (milestone.deliverables) {
+            const delivHeight = addText(`Deliverables: ${milestone.deliverables}`, margin + 5, yPosition, contentWidth - 5, 9);
+            yPosition += delivHeight + 3;
+          }
+        });
+
+        // Notes
+        if (data.notes) {
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(8);
+          const notesHeight = addText(`Note: ${data.notes}`, margin, yPosition, contentWidth, 8);
+          yPosition += notesHeight + 5;
+        }
+
+        yPosition += 5;
+        break;
+      }
+
+      case 'CONTACT': {
+        const data = block.data as ContactBlockData;
+        checkPageBreak(20);
+
+        // Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text(data.title || 'Contacts', margin, yPosition);
+        yPosition += 7;
+
+        // Contacts
+        (data.contacts || []).forEach((contact) => {
+          checkPageBreak(12);
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10);
+          doc.text(contact.name, margin, yPosition);
+          yPosition += 5;
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.text(contact.role, margin, yPosition);
+          yPosition += 4;
+
+          doc.text(`Email: ${contact.email}`, margin, yPosition);
+          if (contact.phone) {
+            doc.text(`Phone: ${contact.phone}`, margin + 60, yPosition);
+          }
+          yPosition += 4;
+
+          if (contact.bio) {
+            const bioHeight = addText(contact.bio, margin, yPosition, contentWidth, 8);
+            yPosition += bioHeight + 2;
+          }
+
+          yPosition += 4;
+        });
+
+        yPosition += 5;
+        break;
+      }
+
+      case 'DISCOUNT': {
+        const data = block.data as DiscountBlockData;
+        checkPageBreak(25);
+
+        // Draw bordered box for discount
+        const boxTop = yPosition;
+        doc.setLineWidth(1);
+        doc.setDrawColor(0, 0, 0);
+
+        // Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        yPosition += 8;
+        doc.text(data.title || 'Special Offer', margin + 5, yPosition);
+        yPosition += 7;
+
+        // Discount value
+        doc.setFontSize(20);
+        const discountText = data.offerType === 'percentage' ? `${data.discountValue}% OFF` : `$${data.discountValue} OFF`;
+        doc.text(discountText, margin + 5, yPosition);
+        yPosition += 10;
+
+        // Description
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        const descHeight = addText(data.description, margin + 5, yPosition, contentWidth - 10, 10);
+        yPosition += descHeight + 5;
+
+        // Valid until
+        if (data.validUntil) {
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(9);
+          doc.text(`Valid Until: ${data.validUntil}`, margin + 5, yPosition);
+          yPosition += 5;
+        }
+
+        // Conditions
+        if (data.conditions && data.conditions.length > 0) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8);
+          data.conditions.forEach((condition) => {
+            doc.text(`• ${condition}`, margin + 5, yPosition);
+            yPosition += 4;
+          });
+        }
+
+        yPosition += 5;
+        doc.rect(margin, boxTop, contentWidth, yPosition - boxTop);
+        yPosition += 5;
+        break;
+      }
+
+      case 'PAYMENT': {
+        const data = block.data as PaymentBlockData;
+        checkPageBreak(20);
+
+        // Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text(data.title || 'Payment Terms', margin, yPosition);
+        yPosition += 7;
+
+        // Payment schedule
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Payment Schedule:', margin, yPosition);
+        yPosition += 6;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        (data.schedule || []).forEach((payment) => {
+          doc.text(`• ${payment.milestone}`, margin + 2, yPosition);
+          doc.text(`${payment.percentage}%`, margin + 100, yPosition);
+          yPosition += 5;
+        });
+
+        yPosition += 3;
+
+        // Banking info
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Banking Information:', margin, yPosition);
+        yPosition += 6;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(`Account Name: ${data.bankingInfo.accountName}`, margin + 2, yPosition);
+        yPosition += 4;
+        doc.text(`Account Number: ${data.bankingInfo.accountNumber}`, margin + 2, yPosition);
+        yPosition += 4;
+        doc.text(`Routing Number: ${data.bankingInfo.routingNumber}`, margin + 2, yPosition);
+        yPosition += 4;
+        if (data.bankingInfo.swiftCode) {
+          doc.text(`SWIFT Code: ${data.bankingInfo.swiftCode}`, margin + 2, yPosition);
+          yPosition += 4;
+        }
+
+        yPosition += 3;
+
+        // Accepted methods
+        if (data.acceptedMethods && data.acceptedMethods.length > 0) {
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10);
+          doc.text('Accepted Payment Methods:', margin, yPosition);
+          yPosition += 6;
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.text(data.acceptedMethods.join(', '), margin + 2, yPosition);
+          yPosition += 5;
+        }
+
+        // Notes
+        if (data.notes) {
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(8);
+          const notesHeight = addText(`Note: ${data.notes}`, margin, yPosition, contentWidth, 8);
+          yPosition += notesHeight + 5;
+        }
+
+        yPosition += 5;
+        break;
+      }
+
+      case 'SIGNATURE': {
+        const data = block.data as SignatureBlockData;
+        checkPageBreak(40);
+
+        // Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text(data.title || 'Signature', margin, yPosition);
+        yPosition += 7;
+
+        // Approval text
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        const approvalHeight = addText(data.approvalText, margin, yPosition, contentWidth, 9);
+        yPosition += approvalHeight + 10;
+
+        // Signature lines
+        const sigWidth = data.showCompanySignature ? (contentWidth - 10) / 2 : contentWidth - 20;
+        const leftX = margin;
+        const rightX = margin + sigWidth + 10;
+
+        // Client signature
+        doc.setLineWidth(0.5);
+        doc.line(leftX, yPosition, leftX + sigWidth, yPosition);
+        yPosition += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.text(data.signatureLabel, leftX, yPosition);
+
+        // Company signature (if enabled)
+        if (data.showCompanySignature) {
+          doc.setLineWidth(0.5);
+          doc.line(rightX, yPosition - 5, rightX + sigWidth, yPosition - 5);
+          doc.text('Company Signature', rightX, yPosition);
+        }
+
+        yPosition += 10;
+
+        // Date lines
+        doc.setLineWidth(0.5);
+        doc.line(leftX, yPosition, leftX + 40, yPosition);
+        yPosition += 5;
+        doc.text(data.dateLabel, leftX, yPosition);
+
+        if (data.showCompanySignature) {
+          doc.setLineWidth(0.5);
+          doc.line(rightX, yPosition - 5, rightX + 40, yPosition - 5);
+          doc.text('Date', rightX, yPosition);
+        }
+
+        yPosition += 10;
         break;
       }
     }

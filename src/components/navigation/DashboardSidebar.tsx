@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Tooltip } from '@mui/material';
 import { QuotesIcon, TemplatesIcon, SettingsIcon } from '@/components/icons/GeometricIcons';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Hook to detect mobile
 const useIsMobile = () => {
@@ -27,36 +28,37 @@ interface NavItem {
   description: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  {
-    label: 'QUOTES',
-    icon: <QuotesIcon />,
-    href: '/quotes',
-    description: 'View and manage all your quotes'
-  },
-  {
-    label: 'TEMPLATES',
-    icon: <TemplatesIcon />,
-    href: '/templates',
-    description: 'Reusable quote templates (coming soon)'
-  },
-  {
-    label: 'SETTINGS',
-    icon: <SettingsIcon />,
-    href: '/settings',
-    description: 'Account and application settings'
-  },
-];
-
 const EXPANDED_WIDTH = 280;
 const COLLAPSED_WIDTH = 72;
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
+  const { t } = useLanguage();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
+
+  const NAV_ITEMS: NavItem[] = [
+    {
+      label: t.dashboard.nav.quotes,
+      icon: <QuotesIcon />,
+      href: '/quotes',
+      description: t.dashboard.quotes.subtitle
+    },
+    {
+      label: t.dashboard.nav.templates,
+      icon: <TemplatesIcon />,
+      href: '/templates',
+      description: t.dashboard.templates.subtitle
+    },
+    {
+      label: t.dashboard.nav.settings,
+      icon: <SettingsIcon />,
+      href: '/settings',
+      description: t.dashboard.settings.subtitle
+    },
+  ];
 
   // Load collapsed state from localStorage on mount
   useEffect(() => {
@@ -164,7 +166,8 @@ export default function DashboardSidebar() {
         aria-label="Main navigation"
         style={{
           width: isMobile ? EXPANDED_WIDTH : (isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH),
-          height: '100vh',
+          height: isMobile ? '100vh' : undefined,
+          alignSelf: isMobile ? undefined : 'stretch',
           background: '#000',
           color: '#FFF',
           borderRight: '3px solid #000',
