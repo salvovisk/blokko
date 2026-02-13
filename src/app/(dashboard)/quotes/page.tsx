@@ -9,6 +9,7 @@ import Toast from '@/components/ui/Toast';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/hooks/useToast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCsrf, withCsrf } from '@/hooks/useCsrf';
 
 interface Quote {
   id: string;
@@ -22,6 +23,7 @@ interface Quote {
 export default function QuotesPage() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { token: csrfToken } = useCsrf();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; title: string } | null>(null);
@@ -60,7 +62,7 @@ export default function QuotesPage() {
     if (!deleteConfirm) return;
 
     try {
-      const res = await fetch(`/api/quotes/${deleteConfirm.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/quotes/${deleteConfirm.id}`, withCsrf(csrfToken, { method: 'DELETE' }));
       if (!res.ok) {
         throw new Error('Failed to delete quote');
       }

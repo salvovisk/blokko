@@ -23,10 +23,12 @@ import Toast from '@/components/ui/Toast';
 import { useToast } from '@/hooks/useToast';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCsrf, withCsrf } from '@/hooks/useCsrf';
 import { generatePDF, downloadPDF, getPDFDataURL } from '@/lib/pdf-generator';
 
 export default function BuilderPage() {
   const { t } = useLanguage();
+  const { token: csrfToken } = useCsrf();
   const { blocks, addBlock, moveBlock, quoteTitle, quoteId, loadQuote, saveAsTemplate } = useBuilderStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -108,18 +110,18 @@ export default function BuilderPage() {
       let response;
       if (quoteId) {
         // Update existing quote
-        response = await fetch(`/api/quotes/${quoteId}`, {
+        response = await fetch(`/api/quotes/${quoteId}`, withCsrf(csrfToken, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
-        });
+        }));
       } else {
         // Create new quote
-        response = await fetch('/api/quotes', {
+        response = await fetch('/api/quotes', withCsrf(csrfToken, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
-        });
+        }));
       }
 
       if (!response.ok) {

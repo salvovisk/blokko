@@ -9,11 +9,13 @@ import Toast from '@/components/ui/Toast';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/hooks/useToast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCsrf, withCsrf } from '@/hooks/useCsrf';
 import type { Template } from '@/types/blocks';
 
 export default function TemplatesPage() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { token: csrfToken } = useCsrf();
   const { loadTemplate } = useBuilderStore();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,11 +61,11 @@ export default function TemplatesPage() {
 
   const handleRenameTemplate = async (id: string, newName: string) => {
     try {
-      const response = await fetch(`/api/templates/${id}`, {
+      const response = await fetch(`/api/templates/${id}`, withCsrf(csrfToken, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName }),
-      });
+      }));
 
       if (!response.ok) {
         throw new Error('Failed to rename template');
@@ -91,9 +93,9 @@ export default function TemplatesPage() {
     if (!deleteConfirm) return;
 
     try {
-      const response = await fetch(`/api/templates/${deleteConfirm.id}`, {
+      const response = await fetch(`/api/templates/${deleteConfirm.id}`, withCsrf(csrfToken, {
         method: 'DELETE',
-      });
+      }));
 
       if (!response.ok) {
         throw new Error('Failed to delete template');

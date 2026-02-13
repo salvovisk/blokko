@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCsrf, withCsrf } from '@/hooks/useCsrf';
 
 export default function SettingsPage() {
   const { data: session, update } = useSession();
   const { t, locale, setLocale } = useLanguage();
+  const { token: csrfToken } = useCsrf();
   const [name, setName] = useState(session?.user?.name || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -26,13 +28,18 @@ export default function SettingsPage() {
       return;
     }
 
+    if (name.length > 100) {
+      showMessage('error', 'Name must be 100 characters or less');
+      return;
+    }
+
     setIsUpdatingProfile(true);
     try {
-      const response = await fetch('/api/user/profile', {
+      const response = await fetch('/api/user/profile', withCsrf(csrfToken, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim() }),
-      });
+      }));
 
       if (!response.ok) {
         throw new Error('Failed to update profile');
@@ -59,18 +66,23 @@ export default function SettingsPage() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      showMessage('error', t.dashboard.settings.messages.passwordLength);
+    if (newPassword.length < 8) {
+      showMessage('error', 'Password must be at least 8 characters');
+      return;
+    }
+
+    if (!/[a-z]/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+      showMessage('error', 'Password must contain uppercase, lowercase, and number');
       return;
     }
 
     setIsChangingPassword(true);
     try {
-      const response = await fetch('/api/user/password', {
+      const response = await fetch('/api/user/password', withCsrf(csrfToken, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword }),
-      });
+      }));
 
       if (!response.ok) {
         const error = await response.json();

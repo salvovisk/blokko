@@ -28,19 +28,19 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const { name, email } = validation.data;
+    const { name } = validation.data;
 
     // Find and update user
     const user = await prisma.user.update({
       where: { email: session.user.email },
       data: {
         ...(name !== undefined && { name }),
-        ...(email !== undefined && { email }),
+        // Email changes removed - requires verification flow for security
       },
     });
 
     return NextResponse.json(
-      { success: true, name: user.name, email: user.email },
+      { success: true, name: user.name },
       { status: 200 }
     );
   } catch (error) {
