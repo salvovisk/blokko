@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
+import DashboardSidebar from '@/components/navigation/DashboardSidebar';
 
 export default function DashboardLayout({
   children,
@@ -34,32 +35,34 @@ export default function DashboardLayout({
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FAFAFA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#FAFAFA' }}>
       {/* Header */}
-      <header style={{ background: '#000', color: '#FFF', padding: '20px', borderBottom: '3px solid #000' }}>
+      <header style={{ background: '#000', color: '#FFF', padding: '16px 20px', borderBottom: '3px solid #000', zIndex: 10 }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <Link href="/dashboard" style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '0.15em', textDecoration: 'none', color: '#FFF' }}>
+            <Link href="/dashboard" style={{ fontSize: 'clamp(18px, 5vw, 24px)', fontWeight: 700, letterSpacing: '0.15em', textDecoration: 'none', color: '#FFF' }}>
               BLOKKO
             </Link>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px, 3vw, 32px)' }}>
+            <span style={{ fontSize: 'clamp(10px, 2.5vw, 12px)', fontWeight: 600, letterSpacing: '0.1em', display: window.innerWidth < 768 ? 'none' : 'inline' }}>
               {session.user.email}
             </span>
             <button
               onClick={() => signOut({ callbackUrl: '/' })}
               style={{
-                padding: '8px 24px',
+                padding: 'clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 24px)',
                 background: 'transparent',
                 border: '2px solid #FFF',
                 color: '#FFF',
-                fontSize: '11px',
+                fontSize: 'clamp(10px, 2.5vw, 11px)',
                 fontWeight: 700,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
+                minWidth: '44px',
+                minHeight: '44px',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = '#FFF';
@@ -70,16 +73,19 @@ export default function DashboardLayout({
                 e.currentTarget.style.color = '#FFF';
               }}
             >
-              LOGOUT
+              {window.innerWidth < 768 ? 'OUT' : 'LOGOUT'}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px 20px' }}>
-        {children}
-      </main>
+      {/* Sidebar + Main Content */}
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <DashboardSidebar />
+        <main style={{ flex: 1, overflowY: 'auto', padding: 'clamp(16px, 4vw, 40px)' }}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

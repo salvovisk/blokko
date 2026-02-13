@@ -28,12 +28,14 @@ This repository contains the **pre-launch landing page** for BLOKKO. The full qu
 ## Tech Stack
 
 **Current (Landing Page):**
+
 - Next.js 16 (App Router)
 - React 18
 - Material-UI (Theme/Typography)
 - TypeScript
 
 **Future (Full App):**
+
 - PostgreSQL database
 - Prisma ORM
 - NextAuth authentication
@@ -70,7 +72,7 @@ For the landing page, no environment variables are required. See `.env.example` 
 ## Project Structure
 
 ```
-preventivo-builder/
+blokko/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx          # Root layout
@@ -99,12 +101,14 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for security features and deployment instru
 ### Quick Deploy
 
 **Vercel:**
+
 ```bash
 npm i -g vercel
 vercel --prod
 ```
 
 **Cloudflare Pages:**
+
 ```bash
 npx wrangler pages deploy .next
 ```
