@@ -31,6 +31,7 @@ RUN npm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
+RUN apk add --no-cache openssl
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -40,17 +41,21 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Copy package files for Prisma installation
+COPY --from=builder /app/package.json /app/package-lock.json ./
+COPY --from=builder /app/prisma ./prisma
+
+# Install ONLY Prisma packages (production dependencies)
+RUN npm install prisma@6.19.2 @prisma/client@6.19.2
+
 # Copy necessary files from builder
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy Prisma schema and generated client
-COPY --from=builder /app/prisma ./prisma
+# Copy generated Prisma client from builder
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 # Set correct permissions
 RUN chown -R nextjs:nodejs /app
@@ -68,4 +73,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Run schema push on container start and start application
-CMD ["sh", "-c", "node_modules/.bin/prisma db push --accept-data-loss && node server.js"]
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node server.js"]
