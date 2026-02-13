@@ -17,7 +17,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: credentials.email.toLowerCase() },
         });
 
         if (!user) {
@@ -45,6 +45,8 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
+    maxAge: 7 * 24 * 60 * 60, // 7 days (default is 30 days)
+    updateAge: 24 * 60 * 60, // Update session every 24 hours
   },
   callbacks: {
     async jwt({ token, user }) {

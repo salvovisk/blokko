@@ -37,6 +37,8 @@ model Quote {
 
   @@map("quotes")
   @@index([userId])
+  @@index([status])
+  @@index([userId, status])
 }
 
 model Template {
@@ -53,4 +55,5 @@ model Template {
   @@map("templates")
   @@index([userId])
   @@index([isSystem])
+  @@index([userId, isSystem])
 }

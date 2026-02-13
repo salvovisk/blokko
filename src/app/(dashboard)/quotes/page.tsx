@@ -37,8 +37,10 @@ export default function QuotesPage() {
       if (!res.ok) {
         throw new Error('Failed to fetch quotes');
       }
-      const data = await res.json();
-      setQuotes(data);
+      const result = await res.json();
+      // Handle new paginated response format
+      const data = result.data || result;
+      setQuotes(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch quotes:', error);
       showToast(t.messages.quotesLoadFailed, 'error');

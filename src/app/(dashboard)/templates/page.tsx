@@ -34,8 +34,10 @@ export default function TemplatesPage() {
         throw new Error('Failed to fetch templates');
       }
 
-      const data = await response.json();
-      setTemplates(data);
+      const result = await response.json();
+      // Handle new paginated response format
+      const data = result.data || result;
+      setTemplates(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error fetching templates:', err);
       showToast(t.messages.templatesLoadFailed, 'error');

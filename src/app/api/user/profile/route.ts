@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { updateProfileSchema, validateRequest } from '@/lib/validations';
 
 // PUT /api/user/profile - Update user profile
 export async function PUT(req: NextRequest) {
@@ -16,23 +17,30 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name } = body;
 
-    if (!name || !name.trim()) {
+    // Validate input with Zod
+    const validation = validateRequest(updateProfileSchema, body);
+
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Name is required' },
+        { error: validation.error },
         { status: 400 }
       );
     }
 
+    const { name, email } = validation.data;
+
     // Find and update user
     const user = await prisma.user.update({
       where: { email: session.user.email },
-      data: { name: name.trim() },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(email !== undefined && { email }),
+      },
     });
 
     return NextResponse.json(
-      { success: true, name: user.name },
+      { success: true, name: user.name, email: user.email },
       { status: 200 }
     );
   } catch (error) {

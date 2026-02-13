@@ -1,27 +1,24 @@
 import { NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
+import { registerSchema, validateRequest } from '@/lib/validations';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json();
+    const body = await request.json();
 
-    // Validate input
-    if (!email || !password) {
+    // Validate input with Zod
+    const validation = validateRequest(registerSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: validation.error },
         { status: 400 }
       );
     }
 
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: 'Password must be at least 6 characters' },
-        { status: 400 }
-      );
-    }
+    const { name, email, password } = validation.data;
 
-    // Check if user already exists
+    // Check if user already exists (email is already normalized by Zod)
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });

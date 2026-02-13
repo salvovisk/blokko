@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { updateTemplateSchema, validateRequest } from '@/lib/validations';
 
 // GET /api/templates/[id] - Get single template
 export async function GET(
@@ -51,10 +52,18 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(
-      { ...template, blocks: JSON.parse(template.content) },
-      { status: 200 }
-    );
+    try {
+      return NextResponse.json(
+        { ...template, blocks: JSON.parse(template.content) },
+        { status: 200 }
+      );
+    } catch (e) {
+      console.error(`Failed to parse template ${template.id}:`, e);
+      return NextResponse.json(
+        { ...template, blocks: [] },
+        { status: 200 }
+      );
+    }
   } catch (error) {
     console.error('Error fetching template:', error);
     return NextResponse.json(
@@ -81,7 +90,22 @@ export async function PUT(
 
     const { id } = await params;
     const body = await req.json();
-    const { name, description, blocks } = body;
+
+    // Validate input with Zod
+    const validation = validateRequest(updateTemplateSchema, {
+      name: body.name,
+      description: body.description,
+      content: body.blocks !== undefined ? JSON.stringify(body.blocks) : undefined,
+    });
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
+
+    const { name, description, content } = validation.data;
 
     const template = await prisma.template.findUnique({
       where: { id },
@@ -127,14 +151,22 @@ export async function PUT(
       data: {
         ...(name !== undefined && { name }),
         ...(description !== undefined && { description }),
-        ...(blocks !== undefined && { content: JSON.stringify(blocks) }),
+        ...(content !== undefined && { content }),
       },
     });
 
-    return NextResponse.json(
-      { ...updated, blocks: JSON.parse(updated.content) },
-      { status: 200 }
-    );
+    try {
+      return NextResponse.json(
+        { ...updated, blocks: JSON.parse(updated.content) },
+        { status: 200 }
+      );
+    } catch (e) {
+      console.error(`Failed to parse updated template:`, e);
+      return NextResponse.json(
+        { ...updated, blocks: [] },
+        { status: 200 }
+      );
+    }
   } catch (error) {
     console.error('Error updating template:', error);
     return NextResponse.json(

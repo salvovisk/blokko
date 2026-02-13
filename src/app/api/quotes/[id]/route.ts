@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { updateQuoteSchema, validateRequest } from '@/lib/validations';
 
 // GET /api/quotes/[id] - Get quote by ID
 export async function GET(
@@ -45,7 +46,12 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ ...quote, blocks: JSON.parse(quote.content) }, { status: 200 });
+    try {
+      return NextResponse.json({ ...quote, blocks: JSON.parse(quote.content) }, { status: 200 });
+    } catch (e) {
+      console.error(`Failed to parse quote ${quote.id}:`, e);
+      return NextResponse.json({ ...quote, blocks: [] }, { status: 200 });
+    }
   } catch (error) {
     console.error('Error fetching quote:', error);
     return NextResponse.json(
@@ -98,18 +104,40 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { title, description, blocks } = body;
+
+    // Validate input with Zod
+    const validation = validateRequest(updateQuoteSchema, {
+      title: body.title,
+      description: body.description,
+      content: body.blocks !== undefined ? JSON.stringify(body.blocks) : undefined,
+      status: body.status,
+    });
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
+
+    const { title, description, content, status } = validation.data;
 
     const updatedQuote = await prisma.quote.update({
       where: { id: id },
       data: {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
-        ...(blocks !== undefined && { content: JSON.stringify(blocks) }),
+        ...(content !== undefined && { content }),
+        ...(status !== undefined && { status }),
       },
     });
 
-    return NextResponse.json({ ...updatedQuote, blocks: JSON.parse(updatedQuote.content) }, { status: 200 });
+    try {
+      return NextResponse.json({ ...updatedQuote, blocks: JSON.parse(updatedQuote.content) }, { status: 200 });
+    } catch (e) {
+      console.error(`Failed to parse updated quote:`, e);
+      return NextResponse.json({ ...updatedQuote, blocks: [] }, { status: 200 });
+    }
   } catch (error) {
     console.error('Error updating quote:', error);
     return NextResponse.json(

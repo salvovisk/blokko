@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { createQuoteSchema, validateRequest } from '@/lib/validations';
 
 // GET /api/quotes - List all quotes for authenticated user
 export async function GET(req: NextRequest) {
@@ -15,19 +16,52 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const quotes = await prisma.quote.findMany({
-      where: {
-        user: {
-          email: session.user.email,
-        },
+    // Pagination parameters
+    const { searchParams } = req.nextUrl;
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100); // Max 100 per page
+    const skip = (page - 1) * limit;
+
+    // Optional status filter
+    const status = searchParams.get('status');
+
+    const where = {
+      user: {
+        email: session.user.email,
       },
+      ...(status && { status }),
+    };
+
+    // Get total count for pagination metadata
+    const total = await prisma.quote.count({ where });
+
+    const quotes = await prisma.quote.findMany({
+      where,
       orderBy: {
         updatedAt: 'desc',
       },
+      skip,
+      take: limit,
     });
 
-    const parsed = quotes.map((q) => ({ ...q, blocks: JSON.parse(q.content) }));
-    return NextResponse.json(parsed, { status: 200 });
+    const parsed = quotes.map((q) => {
+      try {
+        return { ...q, blocks: JSON.parse(q.content) };
+      } catch (e) {
+        console.error(`Failed to parse quote ${q.id}:`, e);
+        return { ...q, blocks: [] };
+      }
+    });
+
+    return NextResponse.json({
+      data: parsed,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    }, { status: 200 });
   } catch (error) {
     console.error('Error fetching quotes:', error);
     return NextResponse.json(
@@ -50,14 +84,23 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, description, blocks } = body;
 
-    if (!title) {
+    // Validate input with Zod
+    const validation = validateRequest(createQuoteSchema, {
+      title: body.title,
+      description: body.description,
+      content: JSON.stringify(body.blocks || []),
+      status: body.status,
+    });
+
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Title is required' },
+        { error: validation.error },
         { status: 400 }
       );
     }
+
+    const { title, description, content, status } = validation.data;
 
     // Find the user by email
     const user = await prisma.user.findUnique({
@@ -75,12 +118,18 @@ export async function POST(req: NextRequest) {
       data: {
         title,
         description: description || '',
-        content: JSON.stringify(blocks || []),
+        content,
+        status,
         userId: user.id,
       },
     });
 
-    return NextResponse.json({ ...quote, blocks: JSON.parse(quote.content) }, { status: 201 });
+    try {
+      return NextResponse.json({ ...quote, blocks: JSON.parse(quote.content) }, { status: 201 });
+    } catch (e) {
+      console.error('Failed to parse created quote:', e);
+      return NextResponse.json({ ...quote, blocks: [] }, { status: 201 });
+    }
   } catch (error) {
     console.error('Error creating quote:', error);
     return NextResponse.json(

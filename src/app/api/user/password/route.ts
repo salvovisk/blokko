@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { compare, hash } from 'bcryptjs';
+import { updatePasswordSchema, validateRequest } from '@/lib/validations';
 
 // PUT /api/user/password - Change user password
 export async function PUT(req: NextRequest) {
@@ -17,21 +18,18 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { currentPassword, newPassword } = body;
 
-    if (!currentPassword || !newPassword) {
+    // Validate input with Zod
+    const validation = validateRequest(updatePasswordSchema, body);
+
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Current and new password are required' },
+        { error: validation.error },
         { status: 400 }
       );
     }
 
-    if (newPassword.length < 6) {
-      return NextResponse.json(
-        { error: 'New password must be at least 6 characters' },
-        { status: 400 }
-      );
-    }
+    const { currentPassword, newPassword } = validation.data;
 
     // Find user
     const user = await prisma.user.findUnique({
