@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import BlockDemo from '@/components/landing/BlockDemo';
-import { BuilderIcon, TemplatesIcon, QuotesIcon, SettingsIcon } from '@/components/icons/GeometricIcons';
+import { BuilderIcon, TemplatesIcon, QuotesIcon, SettingsIcon, BlockLibraryIcon } from '@/components/icons/GeometricIcons';
 
 export default function LandingPage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -117,28 +117,73 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Coming Soon */}
+          {/* CTA Buttons */}
           <div
             style={{
               opacity: isVisible ? 1 : 0,
               transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
               transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s',
+              display: 'flex',
+              gap: '16px',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              marginBottom: '80px',
             }}
           >
-            <div
-              style={{
-                display: 'inline-block',
-                border: '3px solid #000',
-                padding: '20px 64px',
-                background: '#000',
-                color: '#FFF',
-                fontSize: '14px',
-                fontWeight: 700,
-                letterSpacing: '0.15em',
-              }}
-            >
-              COMING SOON
-            </div>
+            <Link href="/register">
+              <div
+                style={{
+                  display: 'inline-block',
+                  border: '3px solid #000',
+                  padding: '18px 48px',
+                  background: '#000',
+                  color: '#FFF',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '6px 6px 0 #000';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                {t.landing.hero.ctaPrimary}
+              </div>
+            </Link>
+            <Link href="/login">
+              <div
+                style={{
+                  display: 'inline-block',
+                  border: '3px solid #000',
+                  padding: '18px 48px',
+                  background: '#FFF',
+                  color: '#000',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#000';
+                  e.currentTarget.style.color = '#FFF';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#FFF';
+                  e.currentTarget.style.color = '#000';
+                }}
+              >
+                {t.landing.hero.ctaSecondary}
+              </div>
+            </Link>
           </div>
 
           {/* Interactive Block Demo */}
@@ -187,6 +232,11 @@ export default function LandingPage() {
                 title: t.landing.features.blockSystem.title,
                 desc: t.landing.features.blockSystem.description,
                 icon: <BuilderIcon />,
+              },
+              {
+                title: t.landing.features.blockLibrary.title,
+                desc: t.landing.features.blockLibrary.description,
+                icon: <BlockLibraryIcon />,
               },
               {
                 title: t.landing.features.templates.title,
@@ -469,21 +519,33 @@ export default function LandingPage() {
           >
             {t.landing.finalCta.description}
           </p>
-          <div
-            style={{
-              display: 'inline-block',
-              border: '3px solid #000',
-              padding: '20px 64px',
-              background: '#000',
-              color: '#FFF',
-              fontSize: '16px',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-            }}
-          >
-            LAUNCHING SOON
-          </div>
+          <Link href="/register">
+            <div
+              style={{
+                display: 'inline-block',
+                border: '3px solid #000',
+                padding: '20px 64px',
+                background: '#000',
+                color: '#FFF',
+                fontSize: '16px',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#FFF';
+                e.currentTarget.style.color = '#000';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#000';
+                e.currentTarget.style.color = '#FFF';
+              }}
+            >
+              {t.landing.finalCta.button}
+            </div>
+          </Link>
         </div>
       </section>
 
@@ -531,14 +593,38 @@ export default function LandingPage() {
 
           <div
             style={{
+              display: 'flex',
+              gap: '24px',
               fontSize: '11px',
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.12em',
-              color: '#666',
             }}
           >
-            LAUNCHING 2026
+            <Link
+              href="/login"
+              style={{
+                color: '#666',
+                textDecoration: 'none',
+                transition: 'color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#FFF')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#666')}
+            >
+              {t.common.signIn}
+            </Link>
+            <Link
+              href="/register"
+              style={{
+                color: '#666',
+                textDecoration: 'none',
+                transition: 'color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#FFF')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#666')}
+            >
+              {t.common.register}
+            </Link>
           </div>
         </div>
 

@@ -45,6 +45,10 @@
       "swissDesign": {
         "title": "DESIGN SVIZZERO",
         "description": "Interfaccia brutalista. Bordi marcati. Tipografia maiuscola. Nessuna decorazione inutile. Pura funzione."
+      },
+      "blockLibrary": {
+        "title": "11+ BLOCCHI",
+        "description": "Ricca libreria di blocchi: intestazioni, prezzi, condizioni, FAQ, tabelle, timeline, contatti, sconti, pagamenti e firme. Tutto ciò che ti serve."
       }
     },
     "howItWorks": {
@@ -85,28 +89,46 @@
   },
   "auth": {
     "login": {
-      "title": "Accedi al tuo account",
-      "email": "INDIRIZZO EMAIL *",
-      "password": "PASSWORD *",
-      "submit": "ACCEDI",
-      "submitting": "ACCESSO IN CORSO...",
+      "title": "Login",
+      "subtitle": "Bentornato. Inserisci le tue credenziali per continuare.",
+      "email": "Indirizzo Email",
+      "emailPlaceholder": "tuaemail@esempio.it",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Accedi",
+      "submitting": "Accesso in corso...",
       "noAccount": "Non hai un account?",
-      "registerLink": "Registrati qui",
-      "error": "Email o password non valide"
+      "createAccount": "Crea Account",
+      "backToHome": "← Torna alla Home",
+      "secureAuth": "Autenticazione sicura powered by NextAuth",
+      "error": "Email o password non valide",
+      "emailRequired": "L'email è obbligatoria",
+      "emailInvalid": "Formato email non valido",
+      "passwordRequired": "La password è obbligatoria"
     },
     "register": {
-      "title": "Crea il tuo account",
-      "name": "NOME COMPLETO",
-      "email": "INDIRIZZO EMAIL *",
-      "password": "PASSWORD *",
-      "confirmPassword": "CONFERMA PASSWORD *",
-      "submit": "REGISTRATI",
-      "submitting": "CREAZIONE ACCOUNT...",
+      "title": "Crea Account",
+      "subtitle": "Unisciti a BLOKKO e inizia a creare preventivi professionali.",
+      "name": "Nome Completo",
+      "namePlaceholder": "Mario Rossi",
+      "email": "Indirizzo Email",
+      "emailPlaceholder": "tuaemail@esempio.it",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Crea Account",
+      "submitting": "Creazione Account...",
       "hasAccount": "Hai già un account?",
-      "loginLink": "Accedi qui",
-      "errorPasswordMismatch": "Le password non corrispondono",
-      "errorPasswordLength": "La password deve essere di almeno 6 caratteri",
-      "errorGeneric": "Si è verificato un errore. Riprova."
+      "signIn": "Accedi",
+      "backToHome": "← Torna alla Home",
+      "nameRequired": "Il nome è obbligatorio",
+      "nameTooLong": "Il nome deve essere di 100 caratteri o meno",
+      "nameNoNumbers": "Il nome non può contenere numeri",
+      "emailRequired": "L'email è obbligatoria",
+      "emailInvalid": "Formato email non valido",
+      "passwordMinLength": "La password deve essere di almeno 8 caratteri",
+      "passwordLowercase": "Deve contenere almeno una lettera minuscola",
+      "passwordUppercase": "Deve contenere almeno una lettera maiuscola",
+      "passwordNumber": "Deve contenere almeno un numero"
     }
   },
   "dashboard": {

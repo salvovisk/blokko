@@ -34,3 +34,18 @@ export const SettingsIcon = () => (
     <rect x="4" y="13" width="24" height="6"/>
   </svg>
 );
+
+export const BlockLibraryIcon = () => (
+  <svg width="1em" height="1em" viewBox="0 0 32 32" fill="currentColor">
+    {/* BLOCK LIBRARY: Grid of blocks metaphor */}
+    <rect x="4" y="4" width="6" height="6"/>
+    <rect x="13" y="4" width="6" height="6"/>
+    <rect x="22" y="4" width="6" height="6"/>
+    <rect x="4" y="13" width="6" height="6"/>
+    <rect x="13" y="13" width="6" height="6"/>
+    <rect x="22" y="13" width="6" height="6"/>
+    <rect x="4" y="22" width="6" height="6"/>
+    <rect x="13" y="22" width="6" height="6"/>
+    <rect x="22" y="22" width="6" height="6"/>
+  </svg>
+);

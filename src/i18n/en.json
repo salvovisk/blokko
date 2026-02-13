@@ -45,6 +45,10 @@
       "swissDesign": {
         "title": "SWISS DESIGN",
         "description": "Brutalist interface. Bold borders. Uppercase typography. No unnecessary decoration. Pure function."
+      },
+      "blockLibrary": {
+        "title": "11+ BLOCKS",
+        "description": "Rich block library including headers, prices, terms, FAQ, tables, timelines, contacts, discounts, payments, and signatures. Everything you need."
       }
     },
     "howItWorks": {
@@ -85,28 +89,46 @@
   },
   "auth": {
     "login": {
-      "title": "Sign in to your account",
-      "email": "EMAIL ADDRESS *",
-      "password": "PASSWORD *",
-      "submit": "SIGN IN",
-      "submitting": "SIGNING IN...",
+      "title": "Login",
+      "subtitle": "Welcome back. Enter your credentials to continue.",
+      "email": "Email Address",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Login",
+      "submitting": "Logging In...",
       "noAccount": "Don't have an account?",
-      "registerLink": "Register here",
-      "error": "Invalid email or password"
+      "createAccount": "Create Account",
+      "backToHome": "← Back to Home",
+      "secureAuth": "Secure authentication powered by NextAuth",
+      "error": "Invalid email or password",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "passwordRequired": "Password is required"
     },
     "register": {
-      "title": "Create your account",
-      "name": "FULL NAME",
-      "email": "EMAIL ADDRESS *",
-      "password": "PASSWORD *",
-      "confirmPassword": "CONFIRM PASSWORD *",
-      "submit": "REGISTER",
-      "submitting": "CREATING ACCOUNT...",
+      "title": "Create Account",
+      "subtitle": "Join BLOKKO and start building professional quotes.",
+      "name": "Full Name",
+      "namePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Create Account",
+      "submitting": "Creating Account...",
       "hasAccount": "Already have an account?",
-      "loginLink": "Sign in here",
-      "errorPasswordMismatch": "Passwords do not match",
-      "errorPasswordLength": "Password must be at least 6 characters",
-      "errorGeneric": "An error occurred. Please try again."
+      "signIn": "Sign In",
+      "backToHome": "← Back to Home",
+      "nameRequired": "Name is required",
+      "nameTooLong": "Name must be 100 characters or less",
+      "nameNoNumbers": "Name cannot contain numbers",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordLowercase": "Must contain at least one lowercase letter",
+      "passwordUppercase": "Must contain at least one uppercase letter",
+      "passwordNumber": "Must contain at least one number"
     }
   },
   "dashboard": {
