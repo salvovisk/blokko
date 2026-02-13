@@ -48,6 +48,9 @@ COPY --from=builder /app/.next/static ./.next/static
 # Copy Prisma schema and generated client
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
 # Set correct permissions
 RUN chown -R nextjs:nodejs /app
@@ -65,4 +68,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Run schema push on container start and start application
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node server.js"]
+CMD ["sh", "-c", "node_modules/.bin/prisma db push --accept-data-loss && node server.js"]
