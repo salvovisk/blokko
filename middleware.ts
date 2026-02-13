@@ -136,7 +136,7 @@ export async function middleware(request: NextRequest) {
     const method = request.method;
     if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
       try {
-        await requireCsrfToken(request);
+        requireCsrfToken(request);
       } catch (error) {
         console.warn(`[SECURITY] CSRF validation failed: ${pathname} from ${ip}`);
         return new NextResponse(

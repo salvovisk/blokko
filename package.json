@@ -30,7 +30,6 @@
     "@mui/material": "^5.15.0",
     "@prisma/client": "^6.19.2",
     "bcryptjs": "^2.4.3",
-    "csrf": "^3.1.0",
     "date-fns": "^4.1.0",
     "jspdf": "^4.1.0",
     "jspdf-autotable": "^5.0.7",

@@ -1,10 +1,33 @@
-import Tokens from 'csrf';
 import { cookies } from 'next/headers';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-const tokens = new Tokens();
 const CSRF_SECRET_COOKIE = 'csrf-secret';
 const CSRF_TOKEN_HEADER = 'x-csrf-token';
+
+/**
+ * Generate a random token (Edge-compatible)
+ */
+function generateRandomToken(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Simple timing-safe comparison (Edge-compatible)
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return result === 0;
+}
 
 /**
  * Generate a CSRF token for the current session
@@ -17,7 +40,7 @@ export async function generateCsrfToken(): Promise<string> {
 
   // Generate new secret if none exists
   if (!secret) {
-    secret = tokens.secretSync();
+    secret = generateRandomToken();
     cookieStore.set(CSRF_SECRET_COOKIE, secret, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -27,16 +50,16 @@ export async function generateCsrfToken(): Promise<string> {
     });
   }
 
-  // Generate token from secret
-  return tokens.create(secret);
+  // For simplicity, use the secret as the token
+  // In production, you might want to hash this
+  return secret;
 }
 
 /**
- * Verify CSRF token from request
+ * Verify CSRF token from request (Edge-compatible)
  */
-export async function verifyCsrfToken(request: NextRequest): Promise<boolean> {
-  const cookieStore = await cookies();
-  const secret = cookieStore.get(CSRF_SECRET_COOKIE)?.value;
+export function verifyCsrfToken(request: NextRequest): boolean {
+  const secret = request.cookies.get(CSRF_SECRET_COOKIE)?.value;
 
   if (!secret) {
     return false;
@@ -49,14 +72,14 @@ export async function verifyCsrfToken(request: NextRequest): Promise<boolean> {
     return false;
   }
 
-  // Verify token
-  return tokens.verify(secret, token);
+  // Verify token matches secret (timing-safe)
+  return timingSafeEqual(secret, token);
 }
 
 /**
  * Middleware helper to check CSRF for state-changing methods
  */
-export async function requireCsrfToken(request: NextRequest): Promise<void> {
+export function requireCsrfToken(request: NextRequest): void {
   const method = request.method;
 
   // Only check for state-changing methods
@@ -69,7 +92,7 @@ export async function requireCsrfToken(request: NextRequest): Promise<void> {
     return;
   }
 
-  const isValid = await verifyCsrfToken(request);
+  const isValid = verifyCsrfToken(request);
 
   if (!isValid) {
     throw new Error('Invalid CSRF token');
