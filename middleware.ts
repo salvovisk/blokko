@@ -136,7 +136,7 @@ export async function middleware(request: NextRequest) {
     const method = request.method;
     if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
       try {
-        await requireCsrfToken(request);
+        requireCsrfToken(request);
       } catch (error) {
         console.warn(`[SECURITY] CSRF validation failed: ${pathname} from ${ip}`);
         return new NextResponse(
@@ -205,7 +205,7 @@ export async function middleware(request: NextRequest) {
   // Content Security Policy
   const cspDirectives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval'", // Next.js requires unsafe-eval in dev mode
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js requires inline scripts and eval
     "style-src 'self' 'unsafe-inline'", // MUI uses inline styles
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
@@ -218,11 +218,6 @@ export async function middleware(request: NextRequest) {
     "worker-src 'self' blob:",
     "manifest-src 'self'",
   ];
-
-  // In production, remove unsafe-eval
-  if (process.env.NODE_ENV === 'production') {
-    cspDirectives[1] = "script-src 'self'";
-  }
 
   response.headers.set('Content-Security-Policy', cspDirectives.join('; '));
 
