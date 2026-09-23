@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Modal, TextField, Typography, List, ListItem, ListItemButton } from '@mui/material';
 import { BlockType } from '@/types/blocks';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export interface Command {
   id: string;
@@ -20,6 +21,7 @@ interface CommandPaletteProps {
 }
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose, commands }) => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -99,9 +101,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose, c
           maxHeight: '60vh',
           backgroundColor: '#FFFFFF',
           border: '4px solid #000000',
-          boxShadow: '8px 8px 0px #000000',
+          boxShadow: '0 24px 64px rgba(0, 0, 0, 0.35)',
           fontFamily: "'Courier New', Courier, monospace",
-          outline: 'none',
         }}
       >
         {/* Search Input */}
@@ -109,7 +110,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose, c
           <TextField
             inputRef={inputRef}
             fullWidth
-            placeholder="Type a command or search..."
+            placeholder={t.builder.palette.placeholder}
+            inputProps={{ 'aria-label': t.builder.palette.placeholder }}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             variant="standard"
@@ -137,10 +139,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose, c
                 sx={{
                   fontFamily: "'Courier New', Courier, monospace",
                   fontSize: '14px',
-                  color: '#999999',
+                  color: '#666666',
                 }}
               >
-                No commands found
+                {t.builder.palette.noResults}
               </Typography>
             </Box>
           ) : (
@@ -149,9 +151,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose, c
                 <Box key={category}>
                   {/* Category Header */}
                   {categoryIndex > 0 && (
-                    <Box sx={{ height: '1px', backgroundColor: '#E0E0E0', marginX: '16px' }} />
+                    <Box sx={{ height: '1px', backgroundColor: '#CCCCCC', marginX: '16px' }} />
                   )}
-                  <Box sx={{ paddingX: '16px', paddingY: '8px', backgroundColor: '#FAFAFA' }}>
+                  <Box sx={{ paddingX: '16px', paddingY: '8px', backgroundColor: '#F0F0F0' }}>
                     <Typography
                       sx={{
                         fontFamily: "'Courier New', Courier, monospace",
@@ -181,10 +183,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose, c
                           sx={{
                             paddingX: '16px',
                             paddingY: '12px',
-                            backgroundColor: isSelected ? '#F5F5F5' : 'transparent',
-                            borderLeft: isSelected ? '4px solid #000000' : '4px solid transparent',
+                            backgroundColor: isSelected ? '#000000' : 'transparent',
+                            color: isSelected ? '#FFFFFF' : '#000000',
+                            '& .MuiTypography-root': { color: isSelected ? '#FFFFFF' : undefined },
                             '&:hover': {
-                              backgroundColor: '#F5F5F5',
+                              backgroundColor: isSelected ? '#000000' : '#F0F0F0',
                             },
                           }}
                         >
@@ -210,7 +213,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose, c
                                 sx={{
                                   fontFamily: "'Courier New', Courier, monospace",
                                   fontSize: '12px',
-                                  color: '#999999',
+                                  color: '#666666',
                                 }}
                               >
                                 {cmd.shortcut}
@@ -232,7 +235,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose, c
           sx={{
             padding: '8px 16px',
             borderTop: '2px solid #000000',
-            backgroundColor: '#FAFAFA',
+            backgroundColor: '#F0F0F0',
             display: 'flex',
             justifyContent: 'space-between',
           }}
@@ -241,19 +244,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose, c
             sx={{
               fontFamily: "'Courier New', Courier, monospace",
               fontSize: '10px',
-              color: '#999999',
+              color: '#666666',
             }}
           >
-            ↑↓ Navigate · ↵ Select · Esc Close
+            {t.builder.palette.footer}
           </Typography>
           <Typography
             sx={{
               fontFamily: "'Courier New', Courier, monospace",
               fontSize: '10px',
-              color: '#999999',
+              color: '#666666',
             }}
           >
-            {filteredCommands.length} command{filteredCommands.length !== 1 ? 's' : ''}
+            {t.builder.palette.count.replace('{count}', String(filteredCommands.length))}
           </Typography>
         </Box>
       </Box>

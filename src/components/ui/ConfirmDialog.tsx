@@ -20,9 +20,9 @@ export default function ConfirmDialog({
   type = 'warning',
 }: ConfirmDialogProps) {
   const colors = {
-    danger: { bg: '#DC2626', border: '#DC2626' },
-    warning: { bg: '#F59E0B', border: '#F59E0B' },
-    info: { bg: '#3B82F6', border: '#3B82F6' },
+    danger: { bg: '#D00000', border: '#D00000' },
+    warning: { bg: '#000000', border: '#000000' },
+    info: { bg: '#000000', border: '#000000' },
   };
 
   const { bg, border } = colors[type];
@@ -48,7 +48,7 @@ export default function ConfirmDialog({
         style={{
           background: '#FFF',
           border: '3px solid #000',
-          boxShadow: '12px 12px 0 0 rgba(0, 0, 0, 0.3)',
+          boxShadow: '0 24px 64px rgba(0, 0, 0, 0.35)',
           maxWidth: '500px',
           width: '100%',
           animation: 'scaleIn 0.2s ease-out',

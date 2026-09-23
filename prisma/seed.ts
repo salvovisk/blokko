@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -7,7 +7,7 @@ async function main() {
   console.log('🌱 Seeding database...');
 
   // Create demo user
-  const demoPassword = await hash('demo123', 12);
+  const demoPassword = await bcrypt.hash('demo123', 12);
 
   const demoUser = await prisma.user.upsert({
     where: { email: 'demo@blokko.com' },

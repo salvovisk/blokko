@@ -4,14 +4,16 @@
  */
 
 export const swissTheme = {
+  // Strict monochrome + one signal red. Red only ever means "attention/error".
   colors: {
     black: '#000000',
     white: '#FFFFFF',
-    gray: '#666666',
-    lightGray: '#CCCCCC',
-    veryLightGray: '#F0F0F0',
+    gray: '#666666',        // secondary text (5.7:1 on white)
+    lightGray: '#CCCCCC',   // light rules, disabled borders
+    veryLightGray: '#F0F0F0', // hover/active wash
     border: '#000000',
     borderLight: '#CCCCCC',
+    error: '#D00000',       // the only non-neutral color (5.9:1 on white)
   },
 
   typography: {
@@ -53,12 +55,16 @@ export const swissTheme = {
     '3xl': '48px',
   },
 
+  // Border scale: 1px dividers, 2px controls, 3px structure, 4px active. No radius, ever.
   borders: {
     thin: '1px solid',
     standard: '2px solid',
+    structure: '3px solid',
     width: {
       thin: '1px',
       standard: '2px',
+      structure: '3px',
+      active: '4px',
     },
   },
 
@@ -79,6 +85,7 @@ export function createSwissCSSVars() {
     --swiss-gray: ${swissTheme.colors.gray};
     --swiss-light-gray: ${swissTheme.colors.lightGray};
     --swiss-very-light-gray: ${swissTheme.colors.veryLightGray};
+    --swiss-error: ${swissTheme.colors.error};
 
     --swiss-font-family: ${swissTheme.typography.fontFamily};
     --swiss-mono-family: ${swissTheme.typography.monoFamily};

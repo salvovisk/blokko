@@ -127,7 +127,7 @@ export default function TemplatesPage() {
 
   return (
     <div>
-      {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
+      {toast && <Toast key={toast.id} message={toast.message} type={toast.type} action={toast.action} onClose={hideToast} />}
 
       {deleteConfirm && (
         <ConfirmDialog

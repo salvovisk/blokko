@@ -201,12 +201,12 @@ export default function RegisterPage() {
             <div
               style={{
                 padding: '16px 18px',
-                background: '#FEF2F2',
-                border: '3px solid #DC2626',
+                background: '#FFFFFF',
+                border: '3px solid #D00000',
                 marginBottom: '28px',
                 fontSize: '13px',
                 fontWeight: 600,
-                color: '#DC2626',
+                color: '#D00000',
                 letterSpacing: '0.02em',
                 animation: 'slideDown 0.3s ease',
                 position: 'relative',
@@ -219,7 +219,7 @@ export default function RegisterPage() {
                   left: 0,
                   width: '4px',
                   height: '100%',
-                  background: '#DC2626',
+                  background: '#D00000',
                 }}
               />
               <div style={{ paddingLeft: '12px' }}>{errors.general}</div>

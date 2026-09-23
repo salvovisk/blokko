@@ -21,7 +21,8 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
         const keyMatch = e.key.toLowerCase() === shortcut.key.toLowerCase();
 
         if (ctrlMatch && shiftMatch && altMatch && keyMatch) {
-          e.preventDefault();
+          // Handlers call preventDefault themselves, so they can defer to
+          // native behavior (e.g. text undo inside a field).
           shortcut.handler(e);
           return;
         }

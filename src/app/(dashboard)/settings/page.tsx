@@ -121,7 +121,7 @@ export default function SettingsPage() {
             left: '50%',
             transform: 'translateX(-50%)',
             padding: '16px 32px',
-            backgroundColor: message.type === 'success' ? '#10B981' : '#EF4444',
+            backgroundColor: message.type === 'success' ? '#000000' : '#D00000',
             color: '#FFFFFF',
             fontWeight: 700,
             textAlign: 'center',
@@ -130,7 +130,7 @@ export default function SettingsPage() {
             letterSpacing: '0.05em',
             zIndex: 10000,
             border: '3px solid #000000',
-            boxShadow: '8px 8px 0 0 rgba(0, 0, 0, 0.3)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
             minWidth: '300px',
           }}
         >
@@ -344,9 +344,9 @@ export default function SettingsPage() {
           disabled={isChangingPassword}
           style={{
             padding: '12px 24px',
-            background: isChangingPassword ? '#666' : '#DC2626',
+            background: isChangingPassword ? '#666' : '#D00000',
             color: '#FFF',
-            border: '3px solid #DC2626',
+            border: '3px solid #D00000',
             fontSize: '13px',
             fontWeight: 700,
             letterSpacing: '0.05em',
@@ -357,12 +357,12 @@ export default function SettingsPage() {
           onMouseEnter={(e) => {
             if (!isChangingPassword) {
               e.currentTarget.style.background = '#FFF';
-              e.currentTarget.style.color = '#DC2626';
+              e.currentTarget.style.color = '#D00000';
             }
           }}
           onMouseLeave={(e) => {
             if (!isChangingPassword) {
-              e.currentTarget.style.background = '#DC2626';
+              e.currentTarget.style.background = '#D00000';
               e.currentTarget.style.color = '#FFF';
             }
           }}

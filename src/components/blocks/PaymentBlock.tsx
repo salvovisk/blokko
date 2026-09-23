@@ -4,23 +4,17 @@ import { useCallback } from 'react';
 import { nanoid } from 'nanoid';
 import type { PaymentBlock as PaymentBlockType, SaveState, PaymentMilestone } from '@/types/blocks';
 import { useBuilderStore } from '@/stores/builder-store';
+import { blockFrameBorder } from './blockFrame';
 
 interface PaymentBlockProps {
   block: PaymentBlockType;
   isActive: boolean;
 }
 
-const SAVE_STATE_COLORS: Record<SaveState, string> = {
-  idle: 'transparent',
-  saving: '#FFD700',
-  saved: '#00DD00',
-  error: '#FF0000',
-};
 
 export default function PaymentBlock({ block, isActive }: PaymentBlockProps) {
   const updateBlockWithAutoSave = useBuilderStore((state) => state.updateBlockWithAutoSave);
   const saveState = block.saveState || 'idle';
-  const accentColor = SAVE_STATE_COLORS[saveState];
 
   const handleChange = useCallback(
     (field: keyof PaymentBlockType['data'], value: any) => {
@@ -65,12 +59,11 @@ export default function PaymentBlock({ block, isActive }: PaymentBlockProps) {
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
-    border: isActive ? '4px solid #000' : '2px solid #000',
+    border: blockFrameBorder(saveState, isActive),
     padding: '32px',
     backgroundColor: isActive ? '#f5f5f5' : '#fff',
     fontFamily: 'monospace',
     transition: 'all 0.2s ease',
-    borderLeft: accentColor !== 'transparent' ? `4px solid ${accentColor}` : isActive ? '4px solid #000' : '2px solid #000',
   };
 
   const titleInputStyle: React.CSSProperties = {
@@ -131,7 +124,7 @@ export default function PaymentBlock({ block, isActive }: PaymentBlockProps) {
   };
 
   return (
-    <div style={containerStyle}>
+    <div className="quote-block" style={containerStyle}>
       <div style={{ marginBottom: '24px' }}>
         <label style={labelStyle}>Block Title</label>
         <input type="text" value={block.data.title} onChange={(e) => handleChange('title', e.target.value)} style={titleInputStyle} placeholder="Payment Terms" />

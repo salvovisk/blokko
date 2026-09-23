@@ -2,8 +2,9 @@
 
 import { useBuilderStore } from '@/stores/builder-store';
 import { useState, useEffect } from 'react';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useModifierKey } from '@/hooks/useModifierKey';
+import QuoteStatusSelect, { type QuoteStatus } from '@/components/ui/QuoteStatusSelect';
 
 interface BuilderToolbarProps {
   onSave?: () => void;
@@ -13,6 +14,9 @@ interface BuilderToolbarProps {
   onSaveAsTemplate?: () => void;
   isSaving?: boolean;
   isExporting?: boolean;
+  /** Only shown once the quote exists on the server */
+  quoteStatus?: string | null;
+  onStatusChange?: (status: QuoteStatus) => void;
 }
 
 export default function BuilderToolbar({
@@ -23,11 +27,13 @@ export default function BuilderToolbar({
   onSaveAsTemplate,
   isSaving = false,
   isExporting = false,
+  quoteStatus,
+  onStatusChange,
 }: BuilderToolbarProps) {
   const { t } = useLanguage();
+  const mod = useModifierKey();
   const { quoteTitle, setQuoteTitle, clearBuilder } = useBuilderStore();
   const [isMobile, setIsMobile] = useState(false);
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Detect mobile
   useEffect(() => {
@@ -37,30 +43,14 @@ export default function BuilderToolbar({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // No confirm dialog: clearing is undoable from the toast the page shows.
   const handleClear = () => {
-    setShowClearConfirm(true);
-  };
-
-  const confirmClear = () => {
     clearBuilder();
     onClear?.();
-    setShowClearConfirm(false);
   };
 
   return (
     <>
-      {showClearConfirm && (
-        <ConfirmDialog
-          title={t.builder.confirmClear.title}
-          message={t.builder.confirmClear.message}
-          confirmText={t.builder.confirmClear.confirm}
-          cancelText={t.builder.confirmClear.cancel}
-          type="danger"
-          onConfirm={confirmClear}
-          onCancel={() => setShowClearConfirm(false)}
-        />
-      )}
-
       <div
         style={{
           display: 'flex',
@@ -78,6 +68,7 @@ export default function BuilderToolbar({
         type="text"
         value={quoteTitle}
         onChange={(e) => setQuoteTitle(e.target.value)}
+        aria-label={t.builder.toolbar.titlePlaceholder}
         style={{
           flex: isMobile ? 'none' : 1,
           fontSize: isMobile ? '14px' : '18px',
@@ -86,12 +77,19 @@ export default function BuilderToolbar({
           padding: isMobile ? '12px' : '8px 12px',
           border: '2px solid #000000',
           backgroundColor: '#FFFFFF',
-          outline: 'none',
           letterSpacing: '0.5px',
           minHeight: isMobile ? '44px' : 'auto',
         }}
         placeholder={t.builder.toolbar.titlePlaceholder}
       />
+
+      {quoteStatus && onStatusChange && (
+        <QuoteStatusSelect
+          value={quoteStatus}
+          onChange={onStatusChange}
+          label={t.builder.toolbar.status}
+        />
+      )}
 
       {/* Buttons Container */}
       <div
@@ -133,7 +131,7 @@ export default function BuilderToolbar({
             }
           }}
         >
-          {isSaving ? t.builder.toolbar.saving : isMobile ? t.builder.toolbar.save : t.builder.toolbar.saveShortcut}
+          {isSaving ? t.builder.toolbar.saving : isMobile ? t.builder.toolbar.save : t.builder.toolbar.saveShortcut.replace('{key}', mod)}
         </button>
 
         {/* Preview Button */}
@@ -210,20 +208,20 @@ export default function BuilderToolbar({
             fontWeight: 'bold',
             textTransform: 'uppercase',
             backgroundColor: '#FFFFFF',
-            color: '#10B981',
-            border: '2px solid #10B981',
+            color: '#000000',
+            border: '2px solid #000000',
             cursor: 'pointer',
             letterSpacing: '0.5px',
             transition: 'all 0.2s',
             minHeight: isMobile ? '44px' : 'auto',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#10B981';
+            e.currentTarget.style.backgroundColor = '#000000';
             e.currentTarget.style.color = '#FFFFFF';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = '#FFFFFF';
-            e.currentTarget.style.color = '#10B981';
+            e.currentTarget.style.color = '#000000';
           }}
         >
           {isMobile ? t.builder.toolbar.saveTemplateMobile : t.builder.toolbar.saveTemplate}
@@ -239,20 +237,20 @@ export default function BuilderToolbar({
             fontWeight: 'bold',
             textTransform: 'uppercase',
             backgroundColor: '#FFFFFF',
-            color: '#DC2626',
-            border: '2px solid #DC2626',
+            color: '#D00000',
+            border: '2px solid #D00000',
             cursor: 'pointer',
             letterSpacing: '0.5px',
             transition: 'all 0.2s',
             minHeight: isMobile ? '44px' : 'auto',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#DC2626';
+            e.currentTarget.style.backgroundColor = '#D00000';
             e.currentTarget.style.color = '#FFFFFF';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = '#FFFFFF';
-            e.currentTarget.style.color = '#DC2626';
+            e.currentTarget.style.color = '#D00000';
           }}
         >
           {t.builder.toolbar.clear}

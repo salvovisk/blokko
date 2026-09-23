@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { BlockTypeIcon } from '@/components/icons/GeometricIcons';
 
 type BlockType = 'HEADER' | 'PRICES' | 'TEXT' | 'TERMS';
 
@@ -10,12 +11,6 @@ interface Block {
   type: BlockType;
 }
 
-const blockIcons: Record<BlockType, string> = {
-  HEADER: '◼',
-  PRICES: '▦',
-  TEXT: '▣',
-  TERMS: '▨',
-};
 
 export default function BlockDemo() {
   const { t } = useLanguage();
@@ -193,7 +188,7 @@ export default function BlockDemo() {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '20px' }}>{blockIcons[blockType]}</span>
+                  <span style={{ fontSize: '20px', display: 'flex' }}><BlockTypeIcon type={blockType} /></span>
                   <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em' }}>
                     {blockType}
                   </span>
@@ -352,7 +347,7 @@ export default function BlockDemo() {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '16px' }}>{blockIcons[block.type]}</span>
+                        <span style={{ fontSize: '16px', display: 'flex' }}><BlockTypeIcon type={block.type} /></span>
                         <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em' }}>
                           {block.type}
                         </span>
