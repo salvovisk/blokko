@@ -4,23 +4,17 @@ import { useCallback } from 'react';
 import { nanoid } from 'nanoid';
 import type { FaqBlock as FaqBlockType, SaveState, FaqItem } from '@/types/blocks';
 import { useBuilderStore } from '@/stores/builder-store';
+import { blockFrameBorder } from './blockFrame';
 
 interface FaqBlockProps {
   block: FaqBlockType;
   isActive: boolean;
 }
 
-const SAVE_STATE_COLORS: Record<SaveState, string> = {
-  idle: 'transparent',
-  saving: '#FFD700',
-  saved: '#00DD00',
-  error: '#FF0000',
-};
 
 export default function FaqBlock({ block, isActive }: FaqBlockProps) {
   const updateBlockWithAutoSave = useBuilderStore((state) => state.updateBlockWithAutoSave);
   const saveState = block.saveState || 'idle';
-  const accentColor = SAVE_STATE_COLORS[saveState];
 
   const handleChange = useCallback(
     (field: keyof FaqBlockType['data'], value: any) => {
@@ -51,17 +45,11 @@ export default function FaqBlock({ block, isActive }: FaqBlockProps) {
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
-    border: isActive ? '4px solid #000' : '2px solid #000',
+    border: blockFrameBorder(saveState, isActive),
     padding: '32px',
     backgroundColor: isActive ? '#f5f5f5' : '#fff',
     fontFamily: 'monospace',
     transition: 'all 0.2s ease',
-    borderLeft:
-      accentColor !== 'transparent'
-        ? `4px solid ${accentColor}`
-        : isActive
-        ? '4px solid #000'
-        : '2px solid #000',
     animation:
       saveState === 'error'
         ? 'shake 0.3s'
@@ -149,7 +137,7 @@ export default function FaqBlock({ block, isActive }: FaqBlockProps) {
           }
         `}
       </style>
-      <div style={containerStyle}>
+      <div className="quote-block" style={containerStyle}>
         {/* Title */}
         <div style={{ marginBottom: '24px' }}>
           <label style={labelStyle}>Block Title</label>

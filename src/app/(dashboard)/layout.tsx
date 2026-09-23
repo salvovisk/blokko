@@ -39,7 +39,8 @@ export default function DashboardLayout({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#FAFAFA' }}>
       {/* Header */}
-      <header style={{ background: '#000', color: '#FFF', padding: '16px 24px', borderBottom: '3px solid #000', zIndex: 10 }}>
+      <header className="dash-header" data-surface="dark" style={{ background: '#000', color: '#FFF', padding: '16px 24px', borderBottom: '3px solid #000', zIndex: 10 }}>
+        <style>{`@media (max-width: 767px) { .dash-header { padding-left: 72px !important; } }`}</style>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
           <Link href="/quotes" style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '0.15em', textDecoration: 'none', color: '#FFF' }}>
             BLOKKO

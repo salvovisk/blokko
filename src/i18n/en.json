@@ -11,7 +11,9 @@
     "cancel": "CANCEL",
     "delete": "DELETE",
     "edit": "EDIT",
-    "close": "CLOSE"
+    "close": "CLOSE",
+    "undo": "UNDO",
+    "redo": "REDO"
   },
   "landing": {
     "hero": {
@@ -240,28 +242,19 @@
         "passwordIncorrect": "Current password is incorrect",
         "passwordFailed": "Failed to change password"
       }
-    },
-    "quoteEditor": {
-      "back": "← BACK",
-      "save": "💾 SAVE",
-      "saving": "SAVING...",
-      "preview": "👁 PREVIEW",
-      "export": "⬇ EXPORT PDF",
-      "saveAsTemplate": "📋 SAVE AS TEMPLATE",
-      "shortcuts": "Ctrl+Z (Undo) • Ctrl+Y (Redo) • Ctrl+S (Save)"
     }
   },
   "builder": {
     "canvas": {
-      "emptyState": "Drop blocks here to start building",
-      "emptyStateHint": "Drag blocks from the sidebar",
+      "emptyState": "Add a block to start building",
+      "emptyStateHint": "Pick one from the block library",
       "dropToAdd": "DROP TO ADD BLOCK"
     },
     "sidebar": {
       "title": "BLOCK LIBRARY",
-      "dragInstruction": "Drag blocks to canvas",
+      "dragInstruction": "Click or drag to add",
       "tapInstruction": "Tap to add blocks",
-      "helpTextDesktop": "Click and drag blocks to the canvas to build your quote.",
+      "helpTextDesktop": "Click a block to add it at the end, or drag it to place it exactly.",
       "helpTextMobile": "Tap any block above to add it to your quote.",
       "blocks": {
         "header": {
@@ -308,12 +301,17 @@
           "label": "Signature",
           "description": "Client approval and sign-off section"
         }
+      },
+      "groups": {
+        "structure": "STRUCTURE",
+        "money": "MONEY",
+        "closing": "CLOSING"
       }
     },
     "toolbar": {
       "titlePlaceholder": "UNTITLED QUOTE",
       "save": "SAVE",
-      "saveShortcut": "SAVE (CTRL+S)",
+      "saveShortcut": "SAVE ({key}+S)",
       "saving": "SAVING...",
       "preview": "PREVIEW",
       "previewMobile": "VIEW",
@@ -322,7 +320,8 @@
       "exporting": "EXPORTING...",
       "saveTemplate": "SAVE AS TEMPLATE",
       "saveTemplateMobile": "TEMPLATE",
-      "clear": "CLEAR"
+      "clear": "CLEAR",
+      "status": "STATUS"
     },
     "saveTemplateModal": {
       "title": "SAVE AS TEMPLATE",
@@ -336,30 +335,53 @@
       "save": "SAVE TEMPLATE",
       "saving": "SAVING..."
     },
-    "confirmClear": {
-      "title": "Clear Builder",
-      "message": "Are you sure you want to clear the builder? This will remove all blocks and cannot be undone.",
-      "confirm": "Clear All",
-      "cancel": "Cancel"
-    },
     "messages": {
       "titleRequired": "Please enter a quote title",
-      "quoteSaved": "Quote saved successfully",
-      "quoteSaveFailed": "Failed to save quote. Please try again.",
-      "quoteLoadFailed": "Failed to load quote. Please try again.",
-      "previewFailed": "Failed to generate preview. Please try again.",
-      "pdfExported": "PDF exported successfully",
-      "pdfExportFailed": "Failed to export PDF. Please try again.",
-      "templateSaved": "Template saved successfully"
+      "quoteSaved": "Quote saved",
+      "quoteSaveFailed": "Couldn't save the quote. Your edits are still here — check your connection and try again.",
+      "quoteLoadFailed": "Couldn't open this quote. It may have been deleted — go back to My Quotes.",
+      "previewFailed": "Couldn't build the preview. Try again, or export the PDF directly.",
+      "pdfExported": "PDF exported",
+      "pdfExportFailed": "Couldn't export the PDF. Try again; if it keeps failing, remove the last block you added.",
+      "templateSaved": "Template saved",
+      "blockDeleted": "{block} block deleted",
+      "builderCleared": "Builder cleared",
+      "statusUpdateFailed": "Couldn't change the status. Try again."
+    },
+    "shortcuts": {
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "undo": "Undo",
+      "commands": "Commands"
+    },
+    "saveState": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "error": "Not saved",
+      "savedAgo": "Saved {time}"
+    },
+    "rail": {
+      "drag": "Drag to reorder",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
+    },
+    "palette": {
+      "placeholder": "Type a command or search…",
+      "noResults": "No matching commands",
+      "footer": "↑↓ Navigate · ↵ Select · Esc Close",
+      "count": "{count} commands",
+      "categoryAdd": "Add",
+      "categoryEdit": "Edit",
+      "addBlock": "Add {block} block",
+      "duplicateBlock": "Duplicate {block} block",
+      "deleteBlock": "Delete {block} block",
+      "moveUp": "Move block up",
+      "moveDown": "Move block down",
+      "undo": "Undo",
+      "redo": "Redo"
     }
   },
   "confirmDialog": {
-    "deleteQuote": {
-      "title": "Delete Quote",
-      "message": "Are you sure you want to delete \"{title}\"? This action cannot be undone.",
-      "confirm": "Delete",
-      "cancel": "Cancel"
-    },
     "deleteTemplate": {
       "title": "Delete Template",
       "message": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
@@ -368,13 +390,14 @@
     }
   },
   "messages": {
-    "quotesLoadFailed": "Failed to load quotes. Please try again.",
-    "quoteDeleted": "Quote deleted successfully",
-    "quoteDeleteFailed": "Failed to delete quote. Please try again.",
+    "quotesLoadFailed": "Couldn't load your quotes. Check your connection and refresh the page.",
+    "quoteDeleted": "Deleted \"{title}\"",
+    "quoteDeleteFailed": "Couldn't delete the quote. It's been restored — try again.",
     "templatesLoadFailed": "Failed to load templates. Please try again.",
     "templateRenamed": "Template renamed successfully",
     "templateRenameFailed": "Failed to rename template",
     "templateDeleted": "Template deleted successfully",
-    "templateDeleteFailed": "Failed to delete template"
+    "templateDeleteFailed": "Failed to delete template",
+    "statusUpdateFailed": "Couldn't change the status. It's been reset — try again."
   }
 }

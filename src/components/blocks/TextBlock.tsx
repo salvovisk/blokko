@@ -1,25 +1,19 @@
 'use client';
 
 import { useCallback } from 'react';
-import type { TextBlock as TextBlockType, SaveState } from '@/types/blocks';
+import type { TextBlock as TextBlockType } from '@/types/blocks';
 import { useBuilderStore } from '@/stores/builder-store';
+import { blockFrameBorder } from './blockFrame';
 
 interface TextBlockProps {
   block: TextBlockType;
   isActive: boolean;
 }
 
-const SAVE_STATE_COLORS: Record<SaveState, string> = {
-  idle: 'transparent',
-  saving: '#FFD700',
-  saved: '#00DD00',
-  error: '#FF0000',
-};
 
 export default function TextBlock({ block, isActive }: TextBlockProps) {
   const updateBlockWithAutoSave = useBuilderStore((state) => state.updateBlockWithAutoSave);
   const saveState = block.saveState || 'idle';
-  const accentColor = SAVE_STATE_COLORS[saveState];
 
   const handleChange = useCallback(
     (field: keyof TextBlockType['data'], value: string) => {
@@ -30,12 +24,11 @@ export default function TextBlock({ block, isActive }: TextBlockProps) {
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
-    border: isActive ? '4px solid #000' : '2px solid #000',
+    border: blockFrameBorder(saveState, isActive),
     padding: '32px',
     backgroundColor: isActive ? '#f5f5f5' : '#fff',
     fontFamily: 'monospace',
     transition: 'all 0.2s ease',
-    borderLeft: accentColor !== 'transparent' ? `4px solid ${accentColor}` : isActive ? '4px solid #000' : '2px solid #000',
     animation: saveState === 'error' ? 'shake 0.3s' : saveState === 'saved' ? 'flash 0.5s' : 'none',
   };
 
@@ -89,7 +82,7 @@ export default function TextBlock({ block, isActive }: TextBlockProps) {
           }
         `}
       </style>
-      <div style={containerStyle}>
+      <div className="quote-block" style={containerStyle}>
         <div>
           <label style={labelStyle}>Title (Optional)</label>
           <input

@@ -11,7 +11,9 @@
     "cancel": "ANNULLA",
     "delete": "ELIMINA",
     "edit": "MODIFICA",
-    "close": "CHIUDI"
+    "close": "CHIUDI",
+    "undo": "ANNULLA",
+    "redo": "RIPRISTINA"
   },
   "landing": {
     "hero": {
@@ -240,28 +242,19 @@
         "passwordIncorrect": "La password attuale non è corretta",
         "passwordFailed": "Cambio password fallito"
       }
-    },
-    "quoteEditor": {
-      "back": "← INDIETRO",
-      "save": "💾 SALVA",
-      "saving": "SALVATAGGIO...",
-      "preview": "👁 ANTEPRIMA",
-      "export": "⬇ ESPORTA PDF",
-      "saveAsTemplate": "📋 SALVA COME MODELLO",
-      "shortcuts": "Ctrl+Z (Annulla) • Ctrl+Y (Ripeti) • Ctrl+S (Salva)"
     }
   },
   "builder": {
     "canvas": {
-      "emptyState": "Trascina i blocchi qui per iniziare",
-      "emptyStateHint": "Trascina i blocchi dalla barra laterale",
+      "emptyState": "Aggiungi un blocco per iniziare",
+      "emptyStateHint": "Scegline uno dalla libreria blocchi",
       "dropToAdd": "RILASCIA PER AGGIUNGERE BLOCCO"
     },
     "sidebar": {
       "title": "LIBRERIA BLOCCHI",
-      "dragInstruction": "Trascina i blocchi sulla tela",
+      "dragInstruction": "Clicca o trascina per aggiungere",
       "tapInstruction": "Tocca per aggiungere blocchi",
-      "helpTextDesktop": "Clicca e trascina i blocchi sulla tela per costruire il tuo preventivo.",
+      "helpTextDesktop": "Clicca un blocco per aggiungerlo in fondo, o trascinalo per posizionarlo.",
       "helpTextMobile": "Tocca qualsiasi blocco qui sopra per aggiungerlo al tuo preventivo.",
       "blocks": {
         "header": {
@@ -308,12 +301,17 @@
           "label": "Firma",
           "description": "Approvazione e sottoscrizione cliente"
         }
+      },
+      "groups": {
+        "structure": "STRUTTURA",
+        "money": "IMPORTI",
+        "closing": "CHIUSURA"
       }
     },
     "toolbar": {
       "titlePlaceholder": "PREVENTIVO SENZA TITOLO",
       "save": "SALVA",
-      "saveShortcut": "SALVA (CTRL+S)",
+      "saveShortcut": "SALVA ({key}+S)",
       "saving": "SALVATAGGIO...",
       "preview": "ANTEPRIMA",
       "previewMobile": "VEDI",
@@ -322,7 +320,8 @@
       "exporting": "ESPORTAZIONE...",
       "saveTemplate": "SALVA COME MODELLO",
       "saveTemplateMobile": "MODELLO",
-      "clear": "CANCELLA"
+      "clear": "CANCELLA",
+      "status": "STATO"
     },
     "saveTemplateModal": {
       "title": "SALVA COME MODELLO",
@@ -336,30 +335,53 @@
       "save": "SALVA MODELLO",
       "saving": "SALVATAGGIO..."
     },
-    "confirmClear": {
-      "title": "Cancella Editor",
-      "message": "Sei sicuro di voler cancellare l'editor? Questo rimuoverà tutti i blocchi e non può essere annullato.",
-      "confirm": "Cancella Tutto",
-      "cancel": "Annulla"
-    },
     "messages": {
       "titleRequired": "Inserisci un titolo per il preventivo",
-      "quoteSaved": "Preventivo salvato con successo",
-      "quoteSaveFailed": "Salvataggio preventivo fallito. Riprova.",
-      "quoteLoadFailed": "Caricamento preventivo fallito. Riprova.",
-      "previewFailed": "Generazione anteprima fallita. Riprova.",
-      "pdfExported": "PDF esportato con successo",
-      "pdfExportFailed": "Esportazione PDF fallita. Riprova.",
-      "templateSaved": "Modello salvato con successo"
+      "quoteSaved": "Preventivo salvato",
+      "quoteSaveFailed": "Impossibile salvare il preventivo. Le modifiche sono ancora qui — controlla la connessione e riprova.",
+      "quoteLoadFailed": "Impossibile aprire il preventivo. Potrebbe essere stato eliminato — torna a I miei preventivi.",
+      "previewFailed": "Impossibile generare l'anteprima. Riprova o esporta direttamente il PDF.",
+      "pdfExported": "PDF esportato",
+      "pdfExportFailed": "Impossibile esportare il PDF. Riprova; se continua, rimuovi l'ultimo blocco aggiunto.",
+      "templateSaved": "Modello salvato",
+      "blockDeleted": "Blocco {block} eliminato",
+      "builderCleared": "Builder svuotato",
+      "statusUpdateFailed": "Impossibile cambiare lo stato. Riprova."
+    },
+    "shortcuts": {
+      "duplicate": "Duplica",
+      "delete": "Elimina",
+      "undo": "Annulla",
+      "commands": "Comandi"
+    },
+    "saveState": {
+      "saving": "Salvataggio…",
+      "saved": "Salvato",
+      "error": "Non salvato",
+      "savedAgo": "Salvato {time}"
+    },
+    "rail": {
+      "drag": "Trascina per riordinare",
+      "moveUp": "Sposta su",
+      "moveDown": "Sposta giù"
+    },
+    "palette": {
+      "placeholder": "Digita un comando o cerca…",
+      "noResults": "Nessun comando trovato",
+      "footer": "↑↓ Naviga · ↵ Seleziona · Esc Chiudi",
+      "count": "{count} comandi",
+      "categoryAdd": "Aggiungi",
+      "categoryEdit": "Modifica",
+      "addBlock": "Aggiungi blocco {block}",
+      "duplicateBlock": "Duplica blocco {block}",
+      "deleteBlock": "Elimina blocco {block}",
+      "moveUp": "Sposta blocco su",
+      "moveDown": "Sposta blocco giù",
+      "undo": "Annulla",
+      "redo": "Ripristina"
     }
   },
   "confirmDialog": {
-    "deleteQuote": {
-      "title": "Elimina Preventivo",
-      "message": "Sei sicuro di voler eliminare \"{title}\"? Questa azione non può essere annullata.",
-      "confirm": "Elimina",
-      "cancel": "Annulla"
-    },
     "deleteTemplate": {
       "title": "Elimina Modello",
       "message": "Sei sicuro di voler eliminare \"{name}\"? Questa azione non può essere annullata.",
@@ -368,13 +390,14 @@
     }
   },
   "messages": {
-    "quotesLoadFailed": "Caricamento preventivi fallito. Riprova.",
-    "quoteDeleted": "Preventivo eliminato con successo",
-    "quoteDeleteFailed": "Eliminazione preventivo fallita. Riprova.",
+    "quotesLoadFailed": "Impossibile caricare i preventivi. Controlla la connessione e ricarica la pagina.",
+    "quoteDeleted": "Eliminato \"{title}\"",
+    "quoteDeleteFailed": "Impossibile eliminare il preventivo. È stato ripristinato — riprova.",
     "templatesLoadFailed": "Caricamento modelli fallito. Riprova.",
     "templateRenamed": "Modello rinominato con successo",
     "templateRenameFailed": "Rinomina modello fallita",
     "templateDeleted": "Modello eliminato con successo",
-    "templateDeleteFailed": "Eliminazione modello fallita"
+    "templateDeleteFailed": "Eliminazione modello fallita",
+    "statusUpdateFailed": "Impossibile cambiare lo stato. È stato ripristinato — riprova."
   }
 }

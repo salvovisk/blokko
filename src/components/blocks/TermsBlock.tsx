@@ -1,25 +1,19 @@
 'use client';
 
 import { useCallback } from 'react';
-import type { TermsBlock as TermsBlockType, SaveState } from '@/types/blocks';
+import type { TermsBlock as TermsBlockType } from '@/types/blocks';
 import { useBuilderStore } from '@/stores/builder-store';
+import { blockFrameBorder } from './blockFrame';
 
 interface TermsBlockProps {
   block: TermsBlockType;
   isActive: boolean;
 }
 
-const SAVE_STATE_COLORS: Record<SaveState, string> = {
-  idle: 'transparent',
-  saving: '#FFD700',
-  saved: '#00DD00',
-  error: '#FF0000',
-};
 
 export default function TermsBlock({ block, isActive }: TermsBlockProps) {
   const updateBlockWithAutoSave = useBuilderStore((state) => state.updateBlockWithAutoSave);
   const saveState = block.saveState || 'idle';
-  const accentColor = SAVE_STATE_COLORS[saveState];
 
   const handleTitleChange = useCallback(
     (value: string) => {
@@ -69,12 +63,11 @@ export default function TermsBlock({ block, isActive }: TermsBlockProps) {
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
-    border: isActive ? '4px solid #000' : '2px solid #000',
+    border: blockFrameBorder(saveState, isActive),
     padding: '32px',
     backgroundColor: isActive ? '#f5f5f5' : '#fff',
     fontFamily: 'monospace',
     transition: 'all 0.2s ease',
-    borderLeft: accentColor !== 'transparent' ? `4px solid ${accentColor}` : isActive ? '4px solid #000' : '2px solid #000',
     animation: saveState === 'error' ? 'shake 0.3s' : saveState === 'saved' ? 'flash 0.5s' : 'none',
   };
 
@@ -176,7 +169,7 @@ export default function TermsBlock({ block, isActive }: TermsBlockProps) {
           }
         `}
       </style>
-      <div style={containerStyle}>
+      <div className="quote-block" style={containerStyle}>
       <input
         type="text"
         value={block.data.title}

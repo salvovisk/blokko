@@ -1,9 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Box, Typography, Chip } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { BlockType, SaveState } from '@/types/blocks';
 import { formatDistanceToNow } from 'date-fns';
+import { it as itLocale } from 'date-fns/locale';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useModifierKey } from '@/hooks/useModifierKey';
+import { swissTheme } from '@/styles/swiss-theme';
 
 interface BlockFocusToolbarProps {
   blockType: BlockType;
@@ -11,25 +15,15 @@ interface BlockFocusToolbarProps {
   lastSaved?: Date;
 }
 
-const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
-  HEADER: 'Header',
-  PRICES: 'Prices',
-  TEXT: 'Text',
-  TERMS: 'Terms & Conditions',
-  FAQ: 'FAQ',
-  TABLE: 'Table',
-  TIMELINE: 'Timeline',
-  CONTACT: 'Contact',
-  DISCOUNT: 'Discount',
-  PAYMENT: 'Payment',
-  SIGNATURE: 'Signature',
-};
+const { colors } = swissTheme;
+const MONO = "'Courier New', Courier, monospace";
 
-const SAVE_STATE_CONFIG: Record<SaveState, { label: string; color: string }> = {
-  idle: { label: '', color: '#000000' },
-  saving: { label: 'Saving...', color: '#FFD700' },
-  saved: { label: 'Saved', color: '#00DD00' },
-  error: { label: 'Error saving', color: '#FF0000' },
+// Save state reads by line style, matching the block frame: dashed = saving,
+// solid = saved, red = error.
+const SAVE_STATE_BORDER: Record<Exclude<SaveState, 'idle'>, string> = {
+  saving: `2px dashed ${colors.black}`,
+  saved: `2px solid ${colors.black}`,
+  error: `2px solid ${colors.error}`,
 };
 
 export const BlockFocusToolbar: React.FC<BlockFocusToolbarProps> = ({
@@ -37,88 +31,89 @@ export const BlockFocusToolbar: React.FC<BlockFocusToolbarProps> = ({
   saveState = 'idle',
   lastSaved,
 }) => {
-  const saveConfig = SAVE_STATE_CONFIG[saveState];
-  const showSaveStatus = saveState !== 'idle';
+  const { t, locale } = useLanguage();
+  const mod = useModifierKey();
+  const blockLabels = t.builder.sidebar.blocks as Record<string, { label: string }>;
+  const shortcuts = t.builder.shortcuts;
+
+  const hint = [
+    `${mod}D ${shortcuts.duplicate}`,
+    `${mod}⌫ ${shortcuts.delete}`,
+    `${mod}Z ${shortcuts.undo}`,
+    `${mod}K ${shortcuts.commands}`,
+  ].join(' · ');
 
   return (
     <Box
       sx={{
         width: '100%',
-        height: '32px',
+        minHeight: '32px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        gap: '12px',
         paddingX: '12px',
-        borderBottom: '2px solid #000000',
-        backgroundColor: '#FAFAFA',
-        fontFamily: "'Courier New', Courier, monospace",
+        borderBottom: `2px solid ${colors.black}`,
+        backgroundColor: colors.veryLightGray,
+        fontFamily: MONO,
       }}
     >
-      {/* Block Type Label */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <Typography
           sx={{
             fontSize: '12px',
             fontWeight: 'bold',
-            fontFamily: "'Courier New', Courier, monospace",
+            fontFamily: MONO,
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
           }}
         >
-          {BLOCK_TYPE_LABELS[blockType]}
+          {blockLabels[blockType.toLowerCase()]?.label ?? blockType}
         </Typography>
 
-        {/* Save Status */}
-        {showSaveStatus && (
-          <Chip
-            label={saveConfig.label}
-            size="small"
-            sx={{
-              height: '20px',
-              fontSize: '10px',
-              fontFamily: "'Courier New', Courier, monospace",
-              fontWeight: 'bold',
-              backgroundColor: '#FFFFFF',
-              border: `2px solid ${saveConfig.color}`,
-              color: saveConfig.color,
-              '& .MuiChip-label': {
+        <Box role="status" aria-live="polite" sx={{ display: 'flex' }}>
+          {saveState !== 'idle' && (
+            <Box
+              component="span"
+              sx={{
+                height: '20px',
+                display: 'inline-flex',
+                alignItems: 'center',
                 paddingX: '8px',
-              },
-              animation: saveState === 'saving' ? 'pulse 1s ease-in-out infinite' : 'none',
-              '@keyframes pulse': {
-                '0%, 100%': { opacity: 1 },
-                '50%': { opacity: 0.6 },
-              },
-            }}
-          />
-        )}
+                fontSize: '10px',
+                fontFamily: MONO,
+                fontWeight: 'bold',
+                textTransform: 'uppercase',
+                backgroundColor: colors.white,
+                border: SAVE_STATE_BORDER[saveState],
+                color: saveState === 'error' ? colors.error : colors.black,
+              }}
+            >
+              {t.builder.saveState[saveState]}
+            </Box>
+          )}
+        </Box>
       </Box>
 
-      {/* Last Saved Time */}
       {lastSaved && saveState === 'idle' && (
-        <Typography
-          sx={{
-            fontSize: '10px',
-            fontFamily: "'Courier New', Courier, monospace",
-            color: '#666666',
-          }}
-        >
-          Saved {formatDistanceToNow(lastSaved, { addSuffix: true })}
+        <Typography sx={{ fontSize: '10px', fontFamily: MONO, color: colors.gray }}>
+          {t.builder.saveState.savedAgo.replace(
+            '{time}',
+            formatDistanceToNow(lastSaved, { addSuffix: true, locale: locale === 'it' ? itLocale : undefined })
+          )}
         </Typography>
       )}
 
-      {/* Keyboard Shortcuts Hint */}
-      <Box sx={{ display: 'flex', gap: '8px' }}>
-        <Typography
-          sx={{
-            fontSize: '10px',
-            fontFamily: "'Courier New', Courier, monospace",
-            color: '#999999',
-          }}
-        >
-          ⌘D: Duplicate · ⌘⌫: Delete · ⌘K: Commands
-        </Typography>
-      </Box>
+      <Typography
+        sx={{
+          fontSize: '10px',
+          fontFamily: MONO,
+          color: colors.gray,
+          display: { xs: 'none', md: 'block' },
+        }}
+      >
+        {hint}
+      </Typography>
     </Box>
   );
 };

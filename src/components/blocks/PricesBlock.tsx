@@ -2,25 +2,19 @@
 
 import { useCallback, useMemo } from 'react';
 import { nanoid } from 'nanoid';
-import type { PricesBlock as PricesBlockType, PriceItem, SaveState } from '@/types/blocks';
+import type { PricesBlock as PricesBlockType, PriceItem } from '@/types/blocks';
 import { useBuilderStore } from '@/stores/builder-store';
+import { blockFrameBorder } from './blockFrame';
 
 interface PricesBlockProps {
   block: PricesBlockType;
   isActive: boolean;
 }
 
-const SAVE_STATE_COLORS: Record<SaveState, string> = {
-  idle: 'transparent',
-  saving: '#FFD700',
-  saved: '#00DD00',
-  error: '#FF0000',
-};
 
 export default function PricesBlock({ block, isActive }: PricesBlockProps) {
   const updateBlockWithAutoSave = useBuilderStore((state) => state.updateBlockWithAutoSave);
   const saveState = block.saveState || 'idle';
-  const accentColor = SAVE_STATE_COLORS[saveState];
 
   const handleItemChange = useCallback(
     (itemId: string, field: keyof PriceItem, value: string | number) => {
@@ -115,12 +109,11 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
-    border: isActive ? '4px solid #000' : '2px solid #000',
+    border: blockFrameBorder(saveState, isActive),
     padding: '32px',
     backgroundColor: isActive ? '#f5f5f5' : '#fff',
     fontFamily: 'monospace',
     transition: 'all 0.2s ease',
-    borderLeft: accentColor !== 'transparent' ? `4px solid ${accentColor}` : isActive ? '4px solid #000' : '2px solid #000',
     animation: saveState === 'error' ? 'shake 0.3s' : saveState === 'saved' ? 'flash 0.5s' : 'none',
   };
 
@@ -203,7 +196,9 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
   const totalRowStyle: React.CSSProperties = {
     display: 'flex',
     justifyContent: 'space-between',
-    minWidth: '300px',
+    width: '100%',
+    maxWidth: '300px',
+    gap: '16px',
     fontSize: '14px',
     fontFamily: 'monospace',
   };
@@ -235,7 +230,7 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
           }
         `}
       </style>
-      <div style={containerStyle}>
+      <div className="quote-block" style={containerStyle}>
       <div style={titleStyle}>
         <span>PRICE TABLE</span>
         <select
@@ -248,7 +243,8 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
         </select>
       </div>
 
-      <table style={tableStyle}>
+      <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
+        <table style={tableStyle}>
         <thead>
           <tr>
             <th style={{ ...thStyle, width: '50%' }}>Description</th>
@@ -313,6 +309,7 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
           ))}
         </tbody>
       </table>
+        </div>
 
       <button onClick={addRow} style={buttonStyle}>
         + Add Row

@@ -9,6 +9,7 @@
   --swiss-gray: #666666;
   --swiss-light-gray: #CCCCCC;
   --swiss-very-light-gray: #F0F0F0;
+  --swiss-error: #D00000;
 
   --swiss-font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   --swiss-mono-family: 'Courier New', Courier, monospace;
@@ -31,6 +32,81 @@ body {
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== BROWSER SURFACES ===== */
+::selection {
+  background: var(--swiss-black);
+  color: var(--swiss-white);
+}
+
+input,
+textarea {
+  caret-color: var(--swiss-black);
+}
+
+/* One focus ring for the whole app: 3px black, offset, keyboard-only */
+:focus-visible {
+  outline: 3px solid var(--swiss-black) !important;
+  outline-offset: 2px;
+}
+
+/* Inverted on black surfaces (sidebar, primary buttons, toasts) */
+[data-surface='dark'] :focus-visible,
+.swiss-btn-primary:focus-visible {
+  outline-color: var(--swiss-white) !important;
+  box-shadow: 0 0 0 5px var(--swiss-black);
+}
+
+a {
+  text-underline-offset: 3px;
+}
+
+* {
+  scrollbar-color: var(--swiss-black) var(--swiss-very-light-gray);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== BUILDER ON PHONES ===== */
+/* Blocks get the full width: the action rail becomes a row above each block
+   and the nested paddings collapse. */
+@media (max-width: 767px) {
+  .builder-canvas {
+    padding: 12px !important;
+  }
+
+  .block-hover-zone {
+    padding-left: 0 !important;
+  }
+
+  .block-action-rail {
+    position: static !important;
+    flex-direction: row !important;
+    height: auto !important;
+    width: auto !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    padding-top: 0 !important;
+    margin-bottom: 8px;
+  }
+
+  .block-body {
+    padding: 0 !important;
+  }
+
+  .quote-block {
+    padding: 16px !important;
+  }
 }
 
 /* ===== SWISS BUTTON ===== */
@@ -97,8 +173,7 @@ body {
 }
 
 .swiss-input:focus {
-  outline: none;
-  border-color: var(--swiss-gray);
+  border-color: var(--swiss-black);
 }
 
 .swiss-input::placeholder {
@@ -125,8 +200,7 @@ body {
 }
 
 .swiss-select:focus {
-  outline: none;
-  border-color: var(--swiss-gray);
+  border-color: var(--swiss-black);
 }
 
 /* ===== SWISS LABEL ===== */

@@ -17,14 +17,26 @@ import type {
   SaveState
 } from '@/types/blocks';
 
+interface HistorySnapshot {
+  blocks: Block[];
+  quoteTitle: string;
+  quoteId: string | null;
+}
+
 interface BuilderState {
   blocks: Block[];
+  past: HistorySnapshot[];
+  future: HistorySnapshot[];
+  /** Last destructive change, so the page can offer an Undo toast. */
+  lastRemoval: { kind: 'block' | 'clear'; blockType?: BlockType; seq: number } | null;
   activeBlockId: string | null;
   quoteTitle: string;
   quoteId: string | null;
   lastSaved: Date | null;
 
   // Actions
+  undo: () => void;
+  redo: () => void;
   addBlock: (type: BlockType, index?: number) => void;
   removeBlock: (id: string) => void;
   updateBlock: (id: string, data: Partial<Block['data']>) => void;
@@ -201,12 +213,75 @@ const createDefaultBlockData = (type: BlockType): Block['data'] => {
 // Debounced auto-save timeout storage
 let autoSaveTimeouts: Record<string, NodeJS.Timeout> = {};
 
+// Undo history. Structural changes (add, remove, move, duplicate, clear,
+// template load) always get their own step; typing in one block is coalesced
+// into a single step until the user pauses or switches block.
+const HISTORY_LIMIT = 50;
+const EDIT_COALESCE_MS = 1500;
+let lastEdit: { key: string; at: number } | null = null;
+
+const takeSnapshot = (state: BuilderState): HistorySnapshot => ({
+  blocks: state.blocks.map((b) => ({ ...b, saveState: 'idle' as SaveState })),
+  quoteTitle: state.quoteTitle,
+  quoteId: state.quoteId,
+});
+
+const recordHistory = (state: BuilderState) => {
+  lastEdit = null;
+  return {
+    past: [...state.past, takeSnapshot(state)].slice(-HISTORY_LIMIT),
+    future: [] as HistorySnapshot[],
+  };
+};
+
+const recordEdit = (state: BuilderState, key: string) => {
+  const now = Date.now();
+  const coalesce = lastEdit && lastEdit.key === key && now - lastEdit.at < EDIT_COALESCE_MS;
+  lastEdit = { key, at: now };
+  if (coalesce) return {};
+  return {
+    past: [...state.past, takeSnapshot(state)].slice(-HISTORY_LIMIT),
+    future: [] as HistorySnapshot[],
+  };
+};
+
 export const useBuilderStore = create<BuilderState>((set, get) => ({
   blocks: [],
+  past: [],
+  future: [],
+  lastRemoval: null,
   activeBlockId: null,
   quoteTitle: 'Untitled Quote',
   quoteId: null,
   lastSaved: null,
+
+  undo: () => {
+    set((state) => {
+      if (state.past.length === 0) return {};
+      const previous = state.past[state.past.length - 1];
+      lastEdit = null;
+      return {
+        ...previous,
+        past: state.past.slice(0, -1),
+        future: [takeSnapshot(state), ...state.future].slice(0, HISTORY_LIMIT),
+        activeBlockId: previous.blocks.some((b) => b.id === state.activeBlockId) ? state.activeBlockId : null,
+      };
+    });
+  },
+
+  redo: () => {
+    set((state) => {
+      if (state.future.length === 0) return {};
+      const [next, ...rest] = state.future;
+      lastEdit = null;
+      return {
+        ...next,
+        past: [...state.past, takeSnapshot(state)].slice(-HISTORY_LIMIT),
+        future: rest,
+        activeBlockId: next.blocks.some((b) => b.id === state.activeBlockId) ? state.activeBlockId : null,
+      };
+    });
+  },
 
   addBlock: (type, index) => {
     const newBlock: Block = {
@@ -223,12 +298,18 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       } else {
         blocks.push(newBlock);
       }
-      return { blocks, activeBlockId: newBlock.id };
+      return { ...recordHistory(state), blocks, activeBlockId: newBlock.id };
     });
   },
 
   removeBlock: (id) => {
     set((state) => ({
+      ...recordHistory(state),
+      lastRemoval: {
+        kind: 'block',
+        blockType: state.blocks.find((block) => block.id === id)?.type,
+        seq: (state.lastRemoval?.seq ?? 0) + 1,
+      },
       blocks: state.blocks.filter((block) => block.id !== id),
       activeBlockId: state.activeBlockId === id ? null : state.activeBlockId,
     }));
@@ -236,6 +317,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
 
   updateBlock: (id, data) => {
     set((state) => ({
+      ...recordEdit(state, id),
       blocks: state.blocks.map((block) =>
         block.id === id
           ? { ...block, data: { ...block.data, ...data } as any }
@@ -247,6 +329,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   updateBlockWithAutoSave: (id, data, onSave) => {
     // Optimistically update the block with 'saving' state
     set((state) => ({
+      ...recordEdit(state, id),
       blocks: state.blocks.map((block) =>
         block.id === id
           ? { ...block, data: { ...block.data, ...data } as any, saveState: 'saving' as SaveState }
@@ -316,7 +399,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       const blocks = [...(state.blocks || [])];
       const [removed] = blocks.splice(fromIndex, 1);
       blocks.splice(toIndex, 0, removed);
-      return { blocks };
+      return { ...recordHistory(state), blocks };
     });
   },
 
@@ -325,7 +408,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   },
 
   setQuoteTitle: (title) => {
-    set({ quoteTitle: title });
+    set((state) => ({ ...recordEdit(state, '__title__'), quoteTitle: title }));
   },
 
   loadQuote: (quoteId, title, blocks) => {
@@ -334,16 +417,21 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       quoteTitle: title,
       blocks,
       activeBlockId: null,
+      past: [],
+      future: [],
     });
+    lastEdit = null;
   },
 
   clearBuilder: () => {
-    set({
+    set((state) => ({
+      ...recordHistory(state),
+      lastRemoval: { kind: 'clear', seq: (state.lastRemoval?.seq ?? 0) + 1 },
       blocks: [],
       activeBlockId: null,
       quoteTitle: 'Untitled Quote',
       quoteId: null,
-    });
+    }));
   },
 
   duplicateBlock: (id) => {
@@ -356,6 +444,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
         saveState: 'idle' as SaveState,
       };
       set((state) => ({
+        ...recordHistory(state),
         blocks: [...(state.blocks || []), newBlock],
         activeBlockId: newBlock.id,
       }));
@@ -370,12 +459,13 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       saveState: 'idle' as SaveState,
     }));
 
-    set({
+    set((state) => ({
+      ...recordHistory(state),
       blocks: blocksWithNewIds,
       quoteTitle: `${templateName} - Copy`,
       quoteId: null, // New quote, not editing existing
       activeBlockId: null,
-    });
+    }));
   },
 
   saveAsTemplate: async (name, description) => {
