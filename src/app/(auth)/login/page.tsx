@@ -1,7 +1,7 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AuthInput from '@/components/auth/AuthInput';
@@ -15,6 +15,18 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
   const [touched, setTouched] = useState<{ email: boolean; password: boolean }>({ email: false, password: false });
   const [loading, setLoading] = useState(false);
+  const [justRegistered, setJustRegistered] = useState(false);
+
+  useEffect(() => {
+    setJustRegistered(new URLSearchParams(window.location.search).get('registered') === 'true');
+  }, []);
+
+  /** Where to go after login: the page the user was bounced from, if it is ours. */
+  const redirectTarget = () => {
+    const callbackUrl = new URLSearchParams(window.location.search).get('callbackUrl');
+    // Only same-origin relative paths; "//evil.com" would be protocol-relative
+    return callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('//') ? callbackUrl : '/quotes';
+  };
 
   const validateEmail = (value: string): string | null => {
     if (!value) return t.auth.login.emailRequired;
@@ -70,7 +82,7 @@ export default function LoginPage() {
       if (result?.error) {
         setErrors({ general: t.auth.login.error });
       } else {
-        router.push('/dashboard');
+        router.push(redirectTarget());
         router.refresh();
       }
     } catch (err) {
@@ -150,17 +162,34 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {justRegistered && !errors.general && (
+            <div
+              role="status"
+              style={{
+                padding: '16px 18px',
+                background: '#FFFFFF',
+                border: '3px solid #000000',
+                marginBottom: '28px',
+                fontSize: '13px',
+                fontWeight: 700,
+              }}
+            >
+              {t.auth.login.registered}
+            </div>
+          )}
+
           {/* General Error */}
           {errors.general && (
             <div
+              role="alert"
               style={{
                 padding: '16px 18px',
-                background: '#FEF2F2',
-                border: '3px solid #DC2626',
+                background: '#FFFFFF',
+                border: '3px solid #D00000',
                 marginBottom: '28px',
                 fontSize: '13px',
                 fontWeight: 600,
-                color: '#DC2626',
+                color: '#D00000',
                 letterSpacing: '0.02em',
                 animation: 'slideDown 0.3s ease',
                 position: 'relative',
@@ -173,7 +202,7 @@ export default function LoginPage() {
                   left: 0,
                   width: '4px',
                   height: '100%',
-                  background: '#DC2626',
+                  background: '#D00000',
                 }}
               />
               <div style={{ paddingLeft: '12px' }}>{errors.general}</div>

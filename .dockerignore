@@ -54,3 +54,8 @@ README.md
 Dockerfile
 .dockerignore
 docker-compose.yml
+
+# Prisma seed (not needed in production)
+prisma/seed.ts
+prisma/*.db
+prisma/*.db-journal

@@ -15,6 +15,7 @@ import { BlockActionRail } from './BlockActionRail';
 import { BlockFocusToolbar } from './BlockFocusToolbar';
 import { CommandPalette, Command } from './CommandPalette';
 import { useBlockKeyboardShortcuts } from '@/hooks/useBlockKeyboardShortcuts';
+import { useModifierKey } from '@/hooks/useModifierKey';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 // Dynamically import block components
@@ -173,6 +174,7 @@ function SortableBlockWrapper({ block, children, index, totalBlocks }: SortableB
 
       {/* Hover Zone - Wraps both action rail and block */}
       <div
+        className="block-hover-zone"
         style={{
           position: 'relative',
           marginBottom: '16px',
@@ -290,7 +292,7 @@ function SortableBlockWrapper({ block, children, index, totalBlocks }: SortableB
             disabled={isDeleting}
             style={{
               padding: '12px 16px',
-              backgroundColor: isDeleting ? '#666666' : '#DC2626',
+              backgroundColor: isDeleting ? '#666666' : '#D00000',
               border: 'none',
               borderLeft: '2px solid #000000',
               color: '#FFFFFF',
@@ -305,13 +307,13 @@ function SortableBlockWrapper({ block, children, index, totalBlocks }: SortableB
             }}
             onMouseEnter={(e) => {
               if (!isDeleting) {
-                e.currentTarget.style.backgroundColor = '#991B1B';
+                e.currentTarget.style.backgroundColor = '#000000';
                 e.currentTarget.style.transform = 'scale(1.05)';
               }
             }}
             onMouseLeave={(e) => {
               if (!isDeleting) {
-                e.currentTarget.style.backgroundColor = '#DC2626';
+                e.currentTarget.style.backgroundColor = '#D00000';
                 e.currentTarget.style.transform = 'scale(1)';
               }
             }}
@@ -322,7 +324,7 @@ function SortableBlockWrapper({ block, children, index, totalBlocks }: SortableB
         </div>
 
         {/* Block Content */}
-        <div style={{ padding: '16px' }}>{children}</div>
+        <div className="block-body" style={{ padding: '16px' }}>{children}</div>
         </div>
         {/* End Block Container */}
       </div>
@@ -374,6 +376,10 @@ export default function BuilderCanvas() {
     duplicateBlock,
     removeBlock,
     moveBlock,
+    undo,
+    redo,
+    past,
+    future,
   } = useBuilderStore();
   const { setNodeRef, isOver } = useDroppable({
     id: 'canvas-droppable',
@@ -384,114 +390,83 @@ export default function BuilderCanvas() {
   const isEmpty = !blocks || blocks.length === 0;
   const activeBlockIndex = blocks?.findIndex((b) => b.id === activeBlockId) ?? -1;
 
-  // Define commands for command palette
-  const commands: Command[] = [
-    // Add block commands
-    {
-      id: 'add-header',
-      label: 'Add Header Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'header', 'company', 'client'],
-      action: () => addBlock('HEADER'),
-    },
-    {
-      id: 'add-prices',
-      label: 'Add Prices Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'prices', 'table', 'items'],
-      action: () => addBlock('PRICES'),
-    },
-    {
-      id: 'add-text',
-      label: 'Add Text Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'text', 'content', 'paragraph'],
-      action: () => addBlock('TEXT'),
-    },
-    {
-      id: 'add-terms',
-      label: 'Add Terms Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'terms', 'conditions'],
-      action: () => addBlock('TERMS'),
-    },
-    {
-      id: 'add-faq',
-      label: 'Add FAQ Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'faq', 'questions', 'answers'],
-      action: () => addBlock('FAQ'),
-    },
-    {
-      id: 'add-table',
-      label: 'Add Table Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'table', 'data', 'grid'],
-      action: () => addBlock('TABLE'),
-    },
-    {
-      id: 'add-timeline',
-      label: 'Add Timeline Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'timeline', 'schedule', 'milestones'],
-      action: () => addBlock('TIMELINE'),
-    },
-    {
-      id: 'add-contact',
-      label: 'Add Contact Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'contact', 'team', 'people'],
-      action: () => addBlock('CONTACT'),
-    },
-    {
-      id: 'add-discount',
-      label: 'Add Discount Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'discount', 'offer', 'promotion'],
-      action: () => addBlock('DISCOUNT'),
-    },
-    {
-      id: 'add-payment',
-      label: 'Add Payment Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'payment', 'banking', 'terms'],
-      action: () => addBlock('PAYMENT'),
-    },
-    {
-      id: 'add-signature',
-      label: 'Add Signature Block',
-      category: 'Add',
-      keywords: ['create', 'new', 'signature', 'approval', 'sign'],
-      action: () => addBlock('SIGNATURE'),
-    },
+  const mod = useModifierKey();
+  const palette = t.builder.palette;
+  const blockCopy = t.builder.sidebar.blocks as Record<string, { label: string; description: string }>;
+  const blockName = (type: BlockType) => blockCopy[type.toLowerCase()]?.label ?? type;
+
+  const ADDABLE: Array<{ type: BlockType; keywords: string[] }> = [
+    { type: 'HEADER', keywords: ['header', 'company', 'client'] },
+    { type: 'PRICES', keywords: ['prices', 'items', 'total'] },
+    { type: 'TEXT', keywords: ['text', 'content', 'paragraph'] },
+    { type: 'TERMS', keywords: ['terms', 'conditions'] },
+    { type: 'FAQ', keywords: ['faq', 'questions', 'answers'] },
+    { type: 'TABLE', keywords: ['table', 'data', 'grid'] },
+    { type: 'TIMELINE', keywords: ['timeline', 'schedule', 'milestones'] },
+    { type: 'CONTACT', keywords: ['contact', 'team', 'people'] },
+    { type: 'DISCOUNT', keywords: ['discount', 'offer', 'promotion'] },
+    { type: 'PAYMENT', keywords: ['payment', 'banking', 'deposit'] },
+    { type: 'SIGNATURE', keywords: ['signature', 'approval', 'sign'] },
   ];
+
+  // Define commands for command palette
+  const commands: Command[] = ADDABLE.map(({ type, keywords }) => ({
+    id: `add-${type.toLowerCase()}`,
+    label: palette.addBlock.replace('{block}', blockName(type)),
+    category: palette.categoryAdd,
+    keywords: ['create', 'new', ...keywords],
+    action: () => addBlock(type),
+  }));
+
+  if (past.length > 0) {
+    commands.push({
+      id: 'undo',
+      label: palette.undo,
+      category: palette.categoryEdit,
+      keywords: ['undo', 'revert', 'back'],
+      shortcut: `${mod}Z`,
+      action: undo,
+    });
+  }
+
+  if (future.length > 0) {
+    commands.push({
+      id: 'redo',
+      label: palette.redo,
+      category: palette.categoryEdit,
+      keywords: ['redo', 'again'],
+      shortcut: `${mod}⇧Z`,
+      action: redo,
+    });
+  }
 
   // Add edit commands if there's an active block
   if (activeBlockId && activeBlockIndex !== -1 && blocks && blocks[activeBlockIndex]) {
+    const activeName = blockName(blocks[activeBlockIndex].type);
     commands.push({
       id: 'duplicate-active',
-      label: `Duplicate ${blocks[activeBlockIndex].type} Block`,
-      category: 'Edit',
+      label: palette.duplicateBlock.replace('{block}', activeName),
+      category: palette.categoryEdit,
       keywords: ['copy', 'duplicate', 'clone'],
-      shortcut: '⌘D',
+      shortcut: `${mod}D`,
       action: () => duplicateBlock(activeBlockId),
     });
 
     commands.push({
       id: 'delete-active',
-      label: `Delete ${blocks[activeBlockIndex].type} Block`,
-      category: 'Edit',
+      label: palette.deleteBlock.replace('{block}', activeName),
+      category: palette.categoryEdit,
       keywords: ['remove', 'delete'],
-      shortcut: '⌘⌫',
+      shortcut: `${mod}⌫`,
       action: () => removeBlock(activeBlockId),
     });
 
     if (activeBlockIndex > 0) {
       commands.push({
         id: 'move-up',
-        label: 'Move Block Up',
-        category: 'Edit',
-        shortcut: '⌘↑',
+        label: palette.moveUp,
+        category: palette.categoryEdit,
+        shortcut: `${mod}↑`,
         action: () => moveBlock(activeBlockIndex, activeBlockIndex - 1),
       });
     }
@@ -499,9 +474,9 @@ export default function BuilderCanvas() {
     if (activeBlockIndex < blocks.length - 1) {
       commands.push({
         id: 'move-down',
-        label: 'Move Block Down',
-        category: 'Edit',
-        shortcut: '⌘↓',
+        label: palette.moveDown,
+        category: palette.categoryEdit,
+        shortcut: `${mod}↓`,
         action: () => moveBlock(activeBlockIndex, activeBlockIndex + 1),
       });
     }
@@ -544,6 +519,7 @@ export default function BuilderCanvas() {
   return (
     <div
       ref={setNodeRef}
+      className="builder-canvas"
       style={{
         flex: 1,
         padding: '24px',

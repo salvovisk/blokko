@@ -2,6 +2,8 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { swissTheme } from '@/styles/swiss-theme';
+import QuoteStatusSelect, { type QuoteStatus } from '@/components/ui/QuoteStatusSelect';
 
 interface Quote {
   id: string;
@@ -16,26 +18,48 @@ interface QuotesTableProps {
   quotes: Quote[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onStatusChange: (id: string, status: QuoteStatus) => void;
 }
 
 type SortColumn = 'title' | 'status' | 'updatedAt';
 type SortDirection = 'asc' | 'desc';
 
-const STATUS_COLORS: Record<string, { border: string; bg: string; color: string }> = {
-  draft: { border: '#666', bg: '#F5F5F5', color: '#666' },
-  sent: { border: '#2563EB', bg: '#EFF6FF', color: '#2563EB' },
-  accepted: { border: '#059669', bg: '#ECFDF5', color: '#059669' },
-  rejected: { border: '#DC2626', bg: '#FEF2F2', color: '#DC2626' },
+const { colors } = swissTheme;
+
+// Lifecycle order, so sorting by status reads draft → sent → accepted → rejected
+const STATUS_ORDER: Record<string, number> = { draft: 0, sent: 1, accepted: 2, rejected: 3 };
+
+const actionButton: React.CSSProperties = {
+  padding: '8px 16px',
+  minHeight: '36px',
+  background: colors.white,
+  fontSize: '11px',
+  fontWeight: 700,
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+  cursor: 'pointer',
+  transition: 'background 0.15s ease, color 0.15s ease',
 };
 
-export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTableProps) {
-  const { t } = useLanguage();
+const editButton: React.CSSProperties = { ...actionButton, border: `2px solid ${colors.black}`, color: colors.black };
+const deleteButton: React.CSSProperties = { ...actionButton, border: `2px solid ${colors.error}`, color: colors.error };
+
+function invert(el: HTMLElement, fg: string) {
+  el.style.background = fg;
+  el.style.color = colors.white;
+}
+
+function restore(el: HTMLElement, fg: string) {
+  el.style.background = colors.white;
+  el.style.color = fg;
+}
+
+export default function QuotesTable({ quotes, onEdit, onDelete, onStatusChange }: QuotesTableProps) {
+  const { t, locale } = useLanguage();
   const [sortColumn, setSortColumn] = useState<SortColumn>('updatedAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect mobile
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -43,30 +67,29 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Handle sorting
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
-      // Toggle direction if same column
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      // New column, default to ascending
       setSortColumn(column);
       setSortDirection('asc');
     }
   };
 
-  // Sort quotes
   const sortedQuotes = useMemo(() => {
     return [...quotes].sort((a, b) => {
-      let aVal: string | number = '';
-      let bVal: string | number = '';
+      let aVal: string | number;
+      let bVal: string | number;
 
       if (sortColumn === 'updatedAt') {
         aVal = new Date(a.updatedAt).getTime();
         bVal = new Date(b.updatedAt).getTime();
+      } else if (sortColumn === 'status') {
+        aVal = STATUS_ORDER[a.status.toLowerCase()] ?? 0;
+        bVal = STATUS_ORDER[b.status.toLowerCase()] ?? 0;
       } else {
-        aVal = (a[sortColumn] || '').toString().toLowerCase();
-        bVal = (b[sortColumn] || '').toString().toLowerCase();
+        aVal = (a.title || '').toLowerCase();
+        bVal = (b.title || '').toLowerCase();
       }
 
       const comparison = aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
@@ -74,128 +97,44 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
     });
   }, [quotes, sortColumn, sortDirection]);
 
-  // Render sort arrow
-  const renderSortArrow = (column: SortColumn) => {
-    if (sortColumn !== column) return null;
-    return (
-      <span style={{ marginLeft: '8px' }}>
-        {sortDirection === 'asc' ? '↑' : '↓'}
-      </span>
-    );
-  };
+  const dateLocale = locale === 'it' ? 'it-IT' : 'en-US';
 
-  // Get status badge styling
-  const getStatusStyle = (status: string) => {
-    const colors = STATUS_COLORS[status.toLowerCase()] || STATUS_COLORS.draft;
-    return {
-      display: 'inline-block',
-      padding: '4px 12px',
-      border: `2px solid ${colors.border}`,
-      background: colors.bg,
-      color: colors.color,
-      fontSize: '11px',
-      fontWeight: 700,
-      letterSpacing: '0.1em',
-      textTransform: 'uppercase' as const,
-    };
-  };
+  const statusLabel = (title: string) => `${t.dashboard.quotes.table.status}: ${title}`;
 
-  if (quotes.length === 0) {
-    return (
-      <div style={{ border: '3px dashed #CCC', padding: '60px', textAlign: 'center', background: '#FAFAFA' }}>
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>▦</div>
-        <p style={{ fontSize: '16px', color: '#666' }}>
-          {t.dashboard.quotes.emptyDescription}
-        </p>
-      </div>
-    );
-  }
-
-  // Mobile card layout
   if (isMobile) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {sortedQuotes.map((quote) => (
-          <div
-            key={quote.id}
-            style={{
-              border: '3px solid #000',
-              background: '#FFF',
-              padding: '16px',
-            }}
-          >
+          <div key={quote.id} style={{ border: `3px solid ${colors.black}`, background: colors.white, padding: '16px' }}>
             <div style={{ marginBottom: '12px' }}>
-              <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em', overflowWrap: 'anywhere' }}>
                 {quote.title}
               </div>
               {quote.description && (
-                <div style={{ fontSize: '12px', color: '#666', marginBottom: '12px' }}>
-                  {quote.description}
-                </div>
+                <div style={{ fontSize: '12px', color: colors.gray, marginBottom: '12px' }}>{quote.description}</div>
               )}
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', fontSize: '11px' }}>
-              <span style={getStatusStyle(quote.status)}>
-                {quote.status}
-              </span>
-              <span style={{ color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {new Date(quote.updatedAt).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                })}
+              <QuoteStatusSelect
+                value={quote.status}
+                onChange={(s) => onStatusChange(quote.id, s)}
+                label={statusLabel(quote.title)}
+              />
+              <span style={{ color: colors.gray, textTransform: 'uppercase', letterSpacing: '0.05em', fontVariantNumeric: 'tabular-nums' }}>
+                {new Date(quote.updatedAt).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}
               </span>
             </div>
 
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
+                type="button"
                 onClick={() => onEdit(quote.id)}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  background: '#000',
-                  border: '2px solid #000',
-                  color: '#FFF',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease-in-out',
-                }}
-                onTouchStart={(e) => {
-                  e.currentTarget.style.background = '#333';
-                }}
-                onTouchEnd={(e) => {
-                  e.currentTarget.style.background = '#000';
-                }}
+                style={{ ...editButton, flex: 1, minHeight: '44px', background: colors.black, color: colors.white }}
               >
                 {t.dashboard.quotes.actions.edit}
               </button>
-              <button
-                onClick={() => onDelete(quote.id)}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  background: '#FFF',
-                  border: '2px solid #DC2626',
-                  color: '#DC2626',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease-in-out',
-                }}
-                onTouchStart={(e) => {
-                  e.currentTarget.style.background = '#DC2626';
-                  e.currentTarget.style.color = '#FFF';
-                }}
-                onTouchEnd={(e) => {
-                  e.currentTarget.style.background = '#FFF';
-                  e.currentTarget.style.color = '#DC2626';
-                }}
-              >
+              <button type="button" onClick={() => onDelete(quote.id)} style={{ ...deleteButton, flex: 1, minHeight: '44px' }}>
                 {t.dashboard.quotes.actions.delete}
               </button>
             </div>
@@ -205,86 +144,51 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
     );
   }
 
-  // Desktop table layout
+  const renderSortHeader = (column: SortColumn, label: string, width?: string) => {
+    const active = sortColumn === column;
+    return (
+      <th
+        key={column}
+        aria-sort={active ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+        style={{ position: 'sticky', top: 0, background: colors.black, width, padding: 0, textAlign: 'left' }}
+      >
+        <button
+          type="button"
+          onClick={() => handleSort(column)}
+          style={{
+            width: '100%',
+            padding: '16px',
+            background: 'transparent',
+            border: 'none',
+            color: colors.white,
+            textAlign: 'left',
+            fontSize: '12px',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = '#333333')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+        >
+          {label}
+          <span aria-hidden="true" style={{ marginLeft: '8px', opacity: active ? 1 : 0 }}>
+            {sortDirection === 'asc' ? '↑' : '↓'}
+          </span>
+        </button>
+      </th>
+    );
+  };
+
   return (
-    <div style={{ border: '3px solid #000', background: '#FFF', overflow: 'auto' }}>
+    <div style={{ border: `3px solid ${colors.black}`, background: colors.white, overflow: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
-          <tr style={{ background: '#000', color: '#FFF' }}>
-            <th
-              onClick={() => handleSort('title')}
-              style={{
-                padding: '16px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                position: 'sticky',
-                top: 0,
-                background: '#000',
-                userSelect: 'none',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#333';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#000';
-              }}
-            >
-              {t.dashboard.quotes.table.title} {renderSortArrow('title')}
-            </th>
-            <th
-              onClick={() => handleSort('status')}
-              style={{
-                padding: '16px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                position: 'sticky',
-                top: 0,
-                background: '#000',
-                width: '150px',
-                userSelect: 'none',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#333';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#000';
-              }}
-            >
-              {t.dashboard.quotes.table.status} {renderSortArrow('status')}
-            </th>
-            <th
-              onClick={() => handleSort('updatedAt')}
-              style={{
-                padding: '16px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                position: 'sticky',
-                top: 0,
-                background: '#000',
-                width: '180px',
-                userSelect: 'none',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#333';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#000';
-              }}
-            >
-              {t.dashboard.quotes.table.updated} {renderSortArrow('updatedAt')}
-            </th>
+          <tr style={{ background: colors.black, color: colors.white }}>
+            {renderSortHeader('title', t.dashboard.quotes.table.title)}
+            {renderSortHeader('status', t.dashboard.quotes.table.status, '170px')}
+            {renderSortHeader('updatedAt', t.dashboard.quotes.table.updated, '180px')}
             <th
               style={{
                 padding: '16px',
@@ -295,7 +199,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
                 textTransform: 'uppercase',
                 position: 'sticky',
                 top: 0,
-                background: '#000',
+                background: colors.black,
                 width: '200px',
               }}
             >
@@ -305,25 +209,14 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
         </thead>
         <tbody>
           {sortedQuotes.map((quote) => (
-            <tr
-              key={quote.id}
-              onMouseEnter={() => setHoveredRow(quote.id)}
-              onMouseLeave={() => setHoveredRow(null)}
-              style={{
-                background: hoveredRow === quote.id ? '#FAFAFA' : '#FFF',
-                borderTop: '2px solid #EEE',
-                transition: 'background 0.15s ease-in-out',
-              }}
-            >
+            <tr key={quote.id} className="quotes-row" style={{ borderTop: `1px solid ${colors.lightGray}` }}>
               <td style={{ padding: '16px' }}>
-                <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>
-                  {quote.title}
-                </div>
+                <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '4px' }}>{quote.title}</div>
                 {quote.description && (
                   <div
                     style={{
                       fontSize: '12px',
-                      color: '#666',
+                      color: colors.gray,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
@@ -335,66 +228,32 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
                 )}
               </td>
               <td style={{ padding: '16px' }}>
-                <span style={getStatusStyle(quote.status)}>
-                  {quote.status}
-                </span>
+                <QuoteStatusSelect
+                  value={quote.status}
+                  onChange={(s) => onStatusChange(quote.id, s)}
+                  label={statusLabel(quote.title)}
+                />
               </td>
-              <td style={{ padding: '16px', fontSize: '14px', color: '#666' }}>
-                {new Date(quote.updatedAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })}
+              <td style={{ padding: '16px', fontSize: '14px', color: colors.gray, fontVariantNumeric: 'tabular-nums' }}>
+                {new Date(quote.updatedAt).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' })}
               </td>
               <td style={{ padding: '16px', textAlign: 'right' }}>
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                   <button
+                    type="button"
                     onClick={() => onEdit(quote.id)}
-                    style={{
-                      padding: '8px 16px',
-                      background: '#FFF',
-                      border: '2px solid #000',
-                      color: '#000',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease-in-out',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#000';
-                      e.currentTarget.style.color = '#FFF';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#FFF';
-                      e.currentTarget.style.color = '#000';
-                    }}
+                    style={editButton}
+                    onMouseEnter={(e) => invert(e.currentTarget, colors.black)}
+                    onMouseLeave={(e) => restore(e.currentTarget, colors.black)}
                   >
                     {t.dashboard.quotes.actions.edit}
                   </button>
                   <button
+                    type="button"
                     onClick={() => onDelete(quote.id)}
-                    style={{
-                      padding: '8px 16px',
-                      background: '#FFF',
-                      border: '2px solid #DC2626',
-                      color: '#DC2626',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease-in-out',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#DC2626';
-                      e.currentTarget.style.color = '#FFF';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#FFF';
-                      e.currentTarget.style.color = '#DC2626';
-                    }}
+                    style={deleteButton}
+                    onMouseEnter={(e) => invert(e.currentTarget, colors.error)}
+                    onMouseLeave={(e) => restore(e.currentTarget, colors.error)}
                   >
                     {t.dashboard.quotes.actions.delete}
                   </button>
@@ -404,6 +263,11 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
           ))}
         </tbody>
       </table>
+      <style jsx>{`
+        .quotes-row:hover {
+          background: ${colors.veryLightGray};
+        }
+      `}</style>
     </div>
   );
 }

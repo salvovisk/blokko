@@ -299,7 +299,8 @@ export function generatePDF(options: PDFOptions): Blob {
 
       case 'TABLE': {
         const data = block.data as TableBlockData;
-        if (data.headers.length === 0) break;
+        if (!data.headers || data.headers.length === 0) break;
+        data.rows = data.rows || [];
 
         checkPageBreak(20);
 
@@ -321,7 +322,7 @@ export function generatePDF(options: PDFOptions): Blob {
 
         data.headers.forEach((header, i) => {
           const x = margin + i * colWidth + 2;
-          doc.text(header, x, yPosition + 5, { align: data.alignment[i] || 'left', maxWidth: colWidth - 4 });
+          doc.text(header, x, yPosition + 5, { align: data.alignment?.[i] || 'left', maxWidth: colWidth - 4 });
         });
         yPosition += 7;
 
@@ -336,7 +337,7 @@ export function generatePDF(options: PDFOptions): Blob {
 
           row.forEach((cell, i) => {
             const x = margin + i * colWidth + 2;
-            doc.text(cell, x, yPosition + 4, { align: data.alignment[i] || 'left', maxWidth: colWidth - 4 });
+            doc.text(cell, x, yPosition + 4, { align: data.alignment?.[i] || 'left', maxWidth: colWidth - 4 });
           });
           yPosition += 6;
         });
@@ -498,6 +499,7 @@ export function generatePDF(options: PDFOptions): Blob {
 
       case 'PAYMENT': {
         const data = block.data as PaymentBlockData;
+        const bankingInfo = data.bankingInfo || { accountName: '', accountNumber: '', routingNumber: '' };
         checkPageBreak(20);
 
         // Title
@@ -530,14 +532,14 @@ export function generatePDF(options: PDFOptions): Blob {
 
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
-        doc.text(`Account Name: ${data.bankingInfo.accountName}`, margin + 2, yPosition);
+        doc.text(`Account Name: ${bankingInfo.accountName}`, margin + 2, yPosition);
         yPosition += 4;
-        doc.text(`Account Number: ${data.bankingInfo.accountNumber}`, margin + 2, yPosition);
+        doc.text(`Account Number: ${bankingInfo.accountNumber}`, margin + 2, yPosition);
         yPosition += 4;
-        doc.text(`Routing Number: ${data.bankingInfo.routingNumber}`, margin + 2, yPosition);
+        doc.text(`Routing Number: ${bankingInfo.routingNumber}`, margin + 2, yPosition);
         yPosition += 4;
-        if (data.bankingInfo.swiftCode) {
-          doc.text(`SWIFT Code: ${data.bankingInfo.swiftCode}`, margin + 2, yPosition);
+        if (bankingInfo.swiftCode) {
+          doc.text(`SWIFT Code: ${bankingInfo.swiftCode}`, margin + 2, yPosition);
           yPosition += 4;
         }
 
@@ -581,7 +583,7 @@ export function generatePDF(options: PDFOptions): Blob {
         // Approval text
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
-        const approvalHeight = addText(data.approvalText, margin, yPosition, contentWidth, 9);
+        const approvalHeight = addText(data.approvalText || '', margin, yPosition, contentWidth, 9);
         yPosition += approvalHeight + 10;
 
         // Signature lines
@@ -595,7 +597,7 @@ export function generatePDF(options: PDFOptions): Blob {
         yPosition += 5;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
-        doc.text(data.signatureLabel, leftX, yPosition);
+        doc.text(data.signatureLabel || 'Client Signature', leftX, yPosition);
 
         // Company signature (if enabled)
         if (data.showCompanySignature) {
@@ -610,7 +612,7 @@ export function generatePDF(options: PDFOptions): Blob {
         doc.setLineWidth(0.5);
         doc.line(leftX, yPosition, leftX + 40, yPosition);
         yPosition += 5;
-        doc.text(data.dateLabel, leftX, yPosition);
+        doc.text(data.dateLabel || 'Date', leftX, yPosition);
 
         if (data.showCompanySignature) {
           doc.setLineWidth(0.5);
@@ -644,7 +646,8 @@ export function downloadPDF(blob: Blob, filename: string) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  // Revoking synchronously can cancel the download in Safari/Firefox
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export function getPDFDataURL(blob: Blob): Promise<string> {

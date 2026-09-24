@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useBuilderStore } from '@/stores/builder-store';
 import { Tooltip } from '@mui/material';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { CloseIcon } from '@/components/icons/GeometricIcons';
 
 // Hook to detect mobile
 const useIsMobile = () => {
@@ -23,14 +24,13 @@ const useIsMobile = () => {
 
 interface DraggableBlockProps {
   type: BlockType;
-  icon: string;
   label: string;
   description: string;
   isMobile?: boolean;
-  onMobileTap?: (type: BlockType) => void;
+  onAdd: (type: BlockType) => void;
 }
 
-function DraggableBlock({ type, icon, label, description, isMobile, onMobileTap }: DraggableBlockProps) {
+function DraggableBlock({ type, label, description, isMobile, onAdd }: DraggableBlockProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `block-${type}`,
     data: {
@@ -40,114 +40,70 @@ function DraggableBlock({ type, icon, label, description, isMobile, onMobileTap 
     disabled: isMobile, // Disable drag on mobile
   });
 
-  const handleClick = () => {
-    if (isMobile && onMobileTap) {
-      onMobileTap(type);
+  // Click (or Enter/Space) appends the block; dragging places it precisely.
+  // The mouse sensor needs 10px of movement, so a plain click never starts a drag.
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onAdd(type);
     }
   };
 
   return (
-    <Tooltip
-      title={description}
-      placement="right"
-      arrow
-      enterDelay={300}
-      disableInteractive
-      slotProps={{
-        tooltip: {
-          sx: {
-            fontFamily: "'Courier New', Courier, monospace",
-            fontSize: '12px',
-            backgroundColor: '#000000',
-            border: '2px solid #000000',
-            padding: '8px 12px',
-          },
-        },
-        arrow: {
-          sx: {
-            color: '#000000',
-          },
-        },
-      }}
-    >
+    <Tooltip title={description} placement="right" arrow enterDelay={400} disableInteractive>
       <div
         ref={!isMobile ? setNodeRef : undefined}
         {...(!isMobile ? listeners : {})}
         {...(!isMobile ? attributes : {})}
-        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        aria-label={`${label}: ${description}`}
+        onClick={() => onAdd(type)}
+        onKeyDown={handleKeyDown}
+        className="sidebar-block"
+        data-dragging={isDragging || undefined}
         style={{
-        padding: '16px',
-        marginBottom: '12px',
-        backgroundColor: isDragging ? '#000000' : '#FFFFFF',
-        border: '3px solid #000000',
-        cursor: isMobile ? 'pointer' : isDragging ? 'grabbing' : 'grab',
-        userSelect: 'none',
-        opacity: isDragging ? 0.4 : 1,
-        transform: isDragging ? 'scale(0.95) rotate(-2deg)' : 'scale(1) rotate(0deg)',
-        transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: isDragging ? 'none' : '0 0 0 0 rgba(0, 0, 0, 0)',
-        position: 'relative' as const,
-        minHeight: isMobile ? '64px' : 'auto',
-        display: 'flex',
-        alignItems: 'center',
-      }}
-      onMouseEnter={(e) => {
-        if (!isDragging && !isMobile) {
-          e.currentTarget.style.transform = 'scale(1.02) translateX(4px)';
-          e.currentTarget.style.boxShadow = '8px 8px 0 0 rgba(0, 0, 0, 0.1)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!isDragging && !isMobile) {
-          e.currentTarget.style.transform = 'scale(1) translateX(0)';
-          e.currentTarget.style.boxShadow = '0 0 0 0 rgba(0, 0, 0, 0)';
-        }
-      }}
-      onTouchStart={(e) => {
-        if (isMobile) {
-          e.currentTarget.style.backgroundColor = '#F0F0F0';
-        }
-      }}
-      onTouchEnd={(e) => {
-        if (isMobile) {
-          e.currentTarget.style.backgroundColor = '#FFFFFF';
-        }
-      }}
-    >
-      <div
-        style={{
+          padding: isMobile ? '0 16px' : '0 14px',
+          minHeight: isMobile ? '52px' : '44px',
+          marginBottom: '6px',
+          backgroundColor: isDragging ? '#000000' : '#FFFFFF',
+          color: isDragging ? '#FFFFFF' : '#000000',
+          border: '2px solid #000000',
+          cursor: isMobile ? 'pointer' : isDragging ? 'grabbing' : 'grab',
+          userSelect: 'none',
+          opacity: isDragging ? 0.4 : 1,
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
-          color: isDragging ? '#FFFFFF' : '#000000',
-          transition: 'color 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+          justifyContent: 'space-between',
+          fontSize: '13px',
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
+          transition: 'background-color 0.12s ease, color 0.12s ease',
         }}
       >
-        <span
-          style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            transform: isDragging ? 'scale(1.1)' : 'scale(1)',
-            transition: 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
-        >
-          {icon}
+        <span>{label}</span>
+        <span aria-hidden="true" className="sidebar-block-plus" style={{ fontSize: '11px', display: 'flex' }}>
+          <PlusIcon />
         </span>
-        <span
-          style={{
-            fontSize: '14px',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-          }}
-        >
-          {label}
-        </span>
-      </div>
       </div>
     </Tooltip>
   );
 }
+
+const PlusIcon = () => (
+  <svg width="1em" height="1em" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+    <rect x="13" y="4" width="6" height="24" />
+    <rect x="4" y="13" width="24" height="6" />
+  </svg>
+);
+
+// Grouped by where the block sits in a quote, so the library reads top to bottom
+const BLOCK_GROUPS: Array<{ key: 'structure' | 'money' | 'closing'; types: BlockType[] }> = [
+  { key: 'structure', types: ['HEADER', 'TEXT', 'TABLE', 'TIMELINE'] },
+  { key: 'money', types: ['PRICES', 'DISCOUNT', 'PAYMENT'] },
+  { key: 'closing', types: ['TERMS', 'FAQ', 'CONTACT', 'SIGNATURE'] },
+];
 
 export default function BuilderSidebar() {
   const { t } = useLanguage();
@@ -155,79 +111,12 @@ export default function BuilderSidebar() {
   const isMobile = useIsMobile();
   const { addBlock } = useBuilderStore();
 
-  const blocks: Array<{ type: BlockType; icon: string; label: string; description: string }> = [
-    {
-      type: 'HEADER',
-      icon: '◼',
-      label: t.builder.sidebar.blocks.header.label,
-      description: t.builder.sidebar.blocks.header.description
-    },
-    {
-      type: 'PRICES',
-      icon: '▦',
-      label: t.builder.sidebar.blocks.prices.label,
-      description: t.builder.sidebar.blocks.prices.description
-    },
-    {
-      type: 'TEXT',
-      icon: '▣',
-      label: t.builder.sidebar.blocks.text.label,
-      description: t.builder.sidebar.blocks.text.description
-    },
-    {
-      type: 'TERMS',
-      icon: '▨',
-      label: t.builder.sidebar.blocks.terms.label,
-      description: t.builder.sidebar.blocks.terms.description
-    },
-    {
-      type: 'FAQ',
-      icon: '◉',
-      label: t.builder.sidebar.blocks.faq?.label || 'FAQ',
-      description: t.builder.sidebar.blocks.faq?.description || 'Questions and answers'
-    },
-    {
-      type: 'TABLE',
-      icon: '▥',
-      label: t.builder.sidebar.blocks.table?.label || 'TABLE',
-      description: t.builder.sidebar.blocks.table?.description || 'Data table'
-    },
-    {
-      type: 'TIMELINE',
-      icon: '◫',
-      label: t.builder.sidebar.blocks.timeline?.label || 'TIMELINE',
-      description: t.builder.sidebar.blocks.timeline?.description || 'Project schedule'
-    },
-    {
-      type: 'CONTACT',
-      icon: '◬',
-      label: t.builder.sidebar.blocks.contact?.label || 'CONTACT',
-      description: t.builder.sidebar.blocks.contact?.description || 'Team members'
-    },
-    {
-      type: 'DISCOUNT',
-      icon: '◭',
-      label: t.builder.sidebar.blocks.discount?.label || 'DISCOUNT',
-      description: t.builder.sidebar.blocks.discount?.description || 'Special offer'
-    },
-    {
-      type: 'PAYMENT',
-      icon: '◮',
-      label: t.builder.sidebar.blocks.payment?.label || 'PAYMENT',
-      description: t.builder.sidebar.blocks.payment?.description || 'Payment terms'
-    },
-    {
-      type: 'SIGNATURE',
-      icon: '◯',
-      label: t.builder.sidebar.blocks.signature?.label || 'SIGNATURE',
-      description: t.builder.sidebar.blocks.signature?.description || 'Client approval'
-    },
-  ];
+  const blockCopy = t.builder.sidebar.blocks as Record<string, { label: string; description: string }>;
+  const groupLabels = t.builder.sidebar.groups;
 
-  // Handle mobile tap to add block
-  const handleMobileTap = (blockType: BlockType) => {
+  const handleAdd = (blockType: BlockType) => {
     addBlock(blockType);
-    setIsOpen(false); // Close modal after adding
+    if (isMobile) setIsOpen(false); // Close sheet after adding
   };
 
   // Close on mobile when clicking outside
@@ -247,7 +136,9 @@ export default function BuilderSidebar() {
       {/* Mobile: Floating Button to Open Sidebar */}
       {isMobile && !isOpen && (
         <button
+          type="button"
           onClick={() => setIsOpen(true)}
+          aria-label={t.builder.sidebar.title}
           style={{
             position: 'fixed',
             bottom: '20px',
@@ -255,19 +146,18 @@ export default function BuilderSidebar() {
             zIndex: 999,
             width: '56px',
             height: '56px',
-            borderRadius: '50%',
             background: '#000',
             border: '3px solid #000',
             color: '#FFF',
-            fontSize: '24px',
+            fontSize: '20px',
             cursor: 'pointer',
-            boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.3)',
+            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.25)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          +
+          <PlusIcon />
         </button>
       )}
 
@@ -346,10 +236,12 @@ export default function BuilderSidebar() {
         {/* Mobile Close Button */}
         {isMobile && (
           <button
+            type="button"
             onClick={() => setIsOpen(false)}
+            aria-label={t.common.close}
             style={{
-              width: '32px',
-              height: '32px',
+              width: '44px',
+              height: '44px',
               background: '#000',
               border: 'none',
               color: '#FFF',
@@ -361,30 +253,57 @@ export default function BuilderSidebar() {
               flexShrink: 0,
             }}
           >
-            ×
+            <CloseIcon />
           </button>
         )}
       </div>
 
-      {/* Draggable Blocks */}
-      <div>
-        {blocks.map((block) => (
-          <DraggableBlock
-            key={block.type}
-            type={block.type}
-            icon={block.icon}
-            label={block.label}
-            description={block.description}
-            isMobile={isMobile}
-            onMobileTap={handleMobileTap}
-          />
-        ))}
-      </div>
+      {/* Block library, grouped */}
+      {BLOCK_GROUPS.map((group) => (
+        <section key={group.key} aria-labelledby={`block-group-${group.key}`} style={{ marginBottom: '20px' }}>
+          <h3
+            id={`block-group-${group.key}`}
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              letterSpacing: '0.15em',
+              color: '#666666',
+              margin: '0 0 8px 0',
+            }}
+          >
+            {groupLabels[group.key]}
+          </h3>
+          {group.types.map((type) => (
+            <DraggableBlock
+              key={type}
+              type={type}
+              label={blockCopy[type.toLowerCase()]?.label ?? type}
+              description={blockCopy[type.toLowerCase()]?.description ?? ''}
+              isMobile={isMobile}
+              onAdd={handleAdd}
+            />
+          ))}
+        </section>
+      ))}
+
+      <style jsx global>{`
+        .sidebar-block:hover:not([data-dragging]) {
+          background-color: #000000 !important;
+          color: #ffffff !important;
+        }
+        .sidebar-block .sidebar-block-plus {
+          opacity: 0.35;
+        }
+        .sidebar-block:hover .sidebar-block-plus,
+        .sidebar-block:focus-visible .sidebar-block-plus {
+          opacity: 1;
+        }
+      `}</style>
 
       {/* Help Text */}
       <div
         style={{
-          marginTop: '32px',
+          marginTop: '12px',
           padding: '16px',
           backgroundColor: '#FFFFFF',
           border: '2px solid #000000',

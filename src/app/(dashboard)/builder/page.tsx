@@ -13,29 +13,45 @@ import {
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useBuilderStore } from '@/stores/builder-store';
+import { useBuilderStore, serializeBlocks } from '@/stores/builder-store';
 import { BlockType } from '@/types/blocks';
 import BuilderSidebar from '@/components/builder/BuilderSidebar';
 import BuilderCanvas from '@/components/builder/BuilderCanvas';
 import BuilderToolbar from '@/components/builder/BuilderToolbar';
 import SaveTemplateModal from '@/components/modals/SaveTemplateModal';
 import Toast from '@/components/ui/Toast';
+import { BlockTypeIcon } from '@/components/icons/GeometricIcons';
 import { useToast } from '@/hooks/useToast';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { QuoteStatus } from '@/components/ui/QuoteStatusSelect';
 import { useCsrf, withCsrf } from '@/hooks/useCsrf';
 import { generatePDF, downloadPDF, getPDFDataURL } from '@/lib/pdf-generator';
 
 export default function BuilderPage() {
   const { t } = useLanguage();
   const { token: csrfToken } = useCsrf();
-  const { blocks, addBlock, moveBlock, quoteTitle, quoteId, loadQuote, saveAsTemplate } = useBuilderStore();
+  const {
+    blocks,
+    addBlock,
+    moveBlock,
+    quoteTitle,
+    quoteId,
+    loadQuote,
+    saveAsTemplate,
+    undo,
+    redo,
+    lastRemoval,
+    startNewQuote,
+    markSaved,
+  } = useBuilderStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [quoteStatus, setQuoteStatus] = useState<string | null>(null);
   const { toast, showToast, hideToast } = useToast();
 
   const searchParams = useSearchParams();
@@ -57,8 +73,61 @@ export default function BuilderPage() {
 
   const sensors = useSensors(mouseSensor, touchSensor);
 
+  // Every destructive change gets an Undo toast instead of a confirm dialog
+  useEffect(() => {
+    if (!lastRemoval) return;
+    const message =
+      lastRemoval.kind === 'clear'
+        ? t.builder.messages.builderCleared
+        : t.builder.messages.blockDeleted.replace(
+            '{block}',
+            lastRemoval.blockType ? blockLabel(lastRemoval.blockType) : ''
+          );
+    showToast(message, 'info', { label: t.common.undo, onClick: undo });
+  }, [lastRemoval?.seq]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const blockLabel = (type: string) =>
+    (t.builder.sidebar.blocks as Record<string, { label: string }>)[type.toLowerCase()]?.label ?? type;
+
+  const isEditingText = (e: KeyboardEvent) => {
+    const target = e.target as HTMLElement;
+    return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+  };
+
   // Keyboard shortcuts
   useKeyboardShortcuts([
+    {
+      key: 'z',
+      ctrl: true,
+      handler: (e) => {
+        // Inside a field, let the browser undo the typing
+        if (isEditingText(e)) return;
+        e.preventDefault();
+        undo();
+      },
+      description: 'Undo',
+    },
+    {
+      key: 'z',
+      ctrl: true,
+      shift: true,
+      handler: (e) => {
+        if (isEditingText(e)) return;
+        e.preventDefault();
+        redo();
+      },
+      description: 'Redo',
+    },
+    {
+      key: 'y',
+      ctrl: true,
+      handler: (e) => {
+        if (isEditingText(e)) return;
+        e.preventDefault();
+        redo();
+      },
+      description: 'Redo',
+    },
     {
       key: 's',
       ctrl: true,
@@ -75,10 +144,23 @@ export default function BuilderPage() {
   // Load quote from URL param on mount
   useEffect(() => {
     const id = searchParams.get('id');
+    if (searchParams.get('new') !== null) {
+      // "New quote": start blank instead of showing whatever was last open
+      startNewQuote();
+      setQuoteStatus(null);
+      router.replace('/builder', { scroll: false });
+      return;
+    }
     if (id && id !== quoteId) {
       loadQuoteFromAPI(id);
+    } else if (id && quoteStatus === null) {
+      // Blocks already in the store; only the status is missing
+      fetch(`/api/quotes/${id}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((quote) => quote && setQuoteStatus(quote.status ?? 'draft'))
+        .catch(() => {});
     }
-  }, [searchParams]);
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadQuoteFromAPI = async (id: string) => {
     try {
@@ -88,6 +170,7 @@ export default function BuilderPage() {
       }
       const quote = await response.json();
       loadQuote(quote.id, quote.title, quote.blocks);
+      setQuoteStatus(quote.status ?? 'draft');
     } catch (error) {
       console.error('Error loading quote:', error);
       showToast(t.builder.messages.quoteLoadFailed, 'error');
@@ -104,7 +187,7 @@ export default function BuilderPage() {
     try {
       const payload = {
         title: quoteTitle,
-        blocks: blocks,
+        blocks: serializeBlocks(blocks),
       };
 
       let response;
@@ -132,7 +215,9 @@ export default function BuilderPage() {
 
       // Update store with saved quote ID
       if (!quoteId) {
-        loadQuote(savedQuote.id, savedQuote.title, savedQuote.blocks);
+        // Keep the blocks and undo history the user is working with
+        markSaved(savedQuote.id);
+        setQuoteStatus(savedQuote.status ?? 'draft');
         // Update URL with quote ID without navigation
         router.replace(`/builder?id=${savedQuote.id}`, { scroll: false });
       }
@@ -143,6 +228,24 @@ export default function BuilderPage() {
       showToast(t.builder.messages.quoteSaveFailed, 'error');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleStatusChange = async (status: QuoteStatus) => {
+    if (!quoteId) return;
+    const previous = quoteStatus;
+    setQuoteStatus(status);
+    try {
+      const response = await fetch(`/api/quotes/${quoteId}`, withCsrf(csrfToken, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      }));
+      if (!response.ok) throw new Error('Failed to update status');
+    } catch (error) {
+      console.error('Error updating status:', error);
+      setQuoteStatus(previous);
+      showToast(t.builder.messages.statusUpdateFailed, 'error');
     }
   };
 
@@ -182,7 +285,7 @@ export default function BuilderPage() {
   };
 
   const handleSaveAsTemplate = async (name: string, description?: string) => {
-    const result = await saveAsTemplate(name, description);
+    const result = await saveAsTemplate(name, description, csrfToken);
 
     if (result.success) {
       showToast(t.builder.messages.templateSaved, 'success');
@@ -241,39 +344,13 @@ export default function BuilderPage() {
     // Check if it's a new block from sidebar
     if (typeof activeId === 'string' && activeId.startsWith('block-')) {
       const blockType = activeId.replace('block-', '') as BlockType;
-      const blockIcons: Record<BlockType, string> = {
-        HEADER: '◼',
-        PRICES: '▦',
-        TEXT: '▣',
-        TERMS: '▨',
-        FAQ: '◉',
-        TABLE: '▥',
-        TIMELINE: '◫',
-        CONTACT: '◬',
-        DISCOUNT: '◭',
-        PAYMENT: '◮',
-        SIGNATURE: '◯',
-      };
-      return { type: blockType, icon: blockIcons[blockType], isNew: true };
+      return { type: blockType, isNew: true };
     }
 
     // It's an existing block being reordered
     const block = blocks.find((b) => b.id === activeId);
     if (block) {
-      const blockIcons: Record<BlockType, string> = {
-        HEADER: '◼',
-        PRICES: '▦',
-        TEXT: '▣',
-        TERMS: '▨',
-        FAQ: '◉',
-        TABLE: '▥',
-        TIMELINE: '◫',
-        CONTACT: '◬',
-        DISCOUNT: '◭',
-        PAYMENT: '◮',
-        SIGNATURE: '◯',
-      };
-      return { type: block.type, icon: blockIcons[block.type as BlockType], isNew: false };
+      return { type: block.type as BlockType, isNew: false };
     }
 
     return null;
@@ -283,7 +360,7 @@ export default function BuilderPage() {
 
   return (
     <>
-      {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
+      {toast && <Toast key={toast.id} message={toast.message} type={toast.type} action={toast.action} onClose={hideToast} />}
 
       <DndContext
         sensors={sensors}
@@ -299,6 +376,8 @@ export default function BuilderPage() {
             onSaveAsTemplate={() => setShowTemplateModal(true)}
             isSaving={isSaving}
             isExporting={isExporting}
+            quoteStatus={quoteId ? quoteStatus : null}
+            onStatusChange={handleStatusChange}
           />
 
           {/* Main Builder Area */}
@@ -329,7 +408,7 @@ export default function BuilderPage() {
                 color: '#FFFFFF',
                 cursor: 'grabbing',
                 transform: 'rotate(-3deg) scale(1.05)',
-                boxShadow: '16px 16px 0 0 rgba(0, 0, 0, 0.3)',
+                boxShadow: '0 24px 64px rgba(0, 0, 0, 0.3)',
                 minWidth: '280px',
                 animation: 'dragFloat 2s ease-in-out infinite',
               }}
@@ -360,7 +439,7 @@ export default function BuilderPage() {
                       }
                     `}
                   </style>
-                  {activeBlock.icon}
+                  <BlockTypeIcon type={activeBlock.type} />
                 </span>
                 <div>
                   <div

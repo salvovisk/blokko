@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-BLOKKO is a quote builder application built with Next.js 16 (App Router), Material-UI, Zustand, Prisma (PostgreSQL), and NextAuth. It features a drag-and-drop block-based editor for creating professional quotes, with bilingual support (English/Italian).
+BLOKKO is a quote builder application built with Next.js 16 (App Router), Material-UI, Zustand, Prisma (SQLite), and NextAuth. It features a drag-and-drop block-based editor for creating professional quotes, with bilingual support (English/Italian).
 
 ## Commands
 
@@ -15,6 +15,8 @@ npm run lint         # ESLint (next lint)
 npm run db:push      # Sync Prisma schema to database
 npm run db:studio    # Open Prisma Studio (database GUI)
 npm run db:seed      # Seed demo data (tsx prisma/seed.ts)
+npm run test:run     # Vitest unit/component/API suites (tests/)
+npx playwright test  # E2E suites (e2e/)
 ```
 
 After installing dependencies, `prisma generate` runs automatically via the `postinstall` script.
@@ -38,7 +40,7 @@ Zustand store at `src/stores/builder-store.ts` manages all builder state: blocks
 
 ### Block System
 
-Four block types: `HEADER`, `PRICES`, `TEXT`, `TERMS`. Each has a dedicated component in `src/components/blocks/` with inline editing and auto-save. Type definitions are in `src/types/blocks.ts`.
+Block types: `HEADER`, `PRICES`, `TEXT`, `TERMS`, `FAQ`, `TABLE`, `TIMELINE`, `CONTACT`, `DISCOUNT`, `PAYMENT`, `SIGNATURE`. The allowed list for API validation is `BLOCK_TYPES` in `src/lib/validations.ts` — keep it in sync. Each has a dedicated component in `src/components/blocks/` with inline editing and auto-save. Type definitions are in `src/types/blocks.ts`.
 
 ### Design System
 
@@ -54,7 +56,7 @@ NextAuth with credentials provider, JWT sessions, bcryptjs password hashing. Con
 
 ### Middleware
 
-`middleware.ts` at project root handles rate limiting (30 req/min per IP), bot blocking, route protection, and security headers.
+`middleware.ts` at project root handles rate limiting (300 req/min per IP, 20/min on login/register; env `RATE_LIMIT_MAX`, `AUTH_RATE_LIMIT_MAX`), bot blocking, route protection, and security headers.
 
 ### Path Alias
 

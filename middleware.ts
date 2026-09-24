@@ -6,9 +6,13 @@ import { requireCsrfToken } from './src/lib/csrf';
 // In-memory rate limiting store
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
-// Rate limit configuration
+// Rate limit configuration. A single page load in this SPA fires ~8 requests
+// (page, session polls, csrf, data), so general traffic gets a generous budget;
+// credential endpoints get a strict one to slow down brute forcing.
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 30; // 30 requests per minute per IP
+const RATE_LIMIT_MAX_REQUESTS = Number(process.env.RATE_LIMIT_MAX ?? 300); // per IP per minute
+const AUTH_RATE_LIMIT_MAX_REQUESTS = Number(process.env.AUTH_RATE_LIMIT_MAX ?? 20); // login/register POSTs
+const AUTH_WRITE_ROUTES = ['/api/auth/callback/credentials', '/api/auth/register'];
 
 // Cleanup old entries every 5 minutes
 setInterval(() => {
@@ -50,13 +54,13 @@ const PROTECTED_API_ROUTES = ['/api/quotes', '/api/templates', '/api/user'];
 // Protected page routes
 const PROTECTED_PAGE_ROUTES = ['/dashboard', '/builder', '/quotes', '/templates', '/settings'];
 
-function isRateLimited(ip: string): boolean {
+function isRateLimited(key: string, max: number): boolean {
   const now = Date.now();
-  const record = rateLimitMap.get(ip);
+  const record = rateLimitMap.get(key);
 
   if (!record || now > record.resetTime) {
     // Create new record or reset expired record
-    rateLimitMap.set(ip, {
+    rateLimitMap.set(key, {
       count: 1,
       resetTime: now + RATE_LIMIT_WINDOW,
     });
@@ -67,7 +71,7 @@ function isRateLimited(ip: string): boolean {
   record.count++;
 
   // Check if over limit
-  if (record.count > RATE_LIMIT_MAX_REQUESTS) {
+  if (record.count > max) {
     return true;
   }
 
@@ -89,7 +93,7 @@ function isPublicRoute(pathname: string): boolean {
 
 function isProtectedApiRoute(pathname: string): boolean {
   return PROTECTED_API_ROUTES.some(route => {
-    return pathname.startsWith(route);
+    return pathname === route || pathname.startsWith(route + '/');
   });
 }
 
@@ -119,8 +123,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // 2. Rate limiting (only for non-static assets)
+  const isAuthWrite = request.method === 'POST' && AUTH_WRITE_ROUTES.includes(pathname);
+  if (isAuthWrite && isRateLimited(`auth:${ip}`, AUTH_RATE_LIMIT_MAX_REQUESTS)) {
+    console.warn(`[SECURITY] Auth rate limit exceeded for IP: ${ip}`);
+    return new NextResponse('Too Many Requests', { status: 429, headers: { 'Retry-After': '60' } });
+  }
   if (!pathname.startsWith('/_next') && !pathname.includes('.')) {
-    if (isRateLimited(ip)) {
+    if (isRateLimited(ip, RATE_LIMIT_MAX_REQUESTS)) {
       console.warn(`[SECURITY] Rate limit exceeded for IP: ${ip}`);
       return new NextResponse('Too Many Requests', {
         status: 429,
@@ -136,7 +145,7 @@ export async function middleware(request: NextRequest) {
     const method = request.method;
     if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
       try {
-        await requireCsrfToken(request);
+        requireCsrfToken(request);
       } catch (error) {
         console.warn(`[SECURITY] CSRF validation failed: ${pathname} from ${ip}`);
         return new NextResponse(
@@ -205,7 +214,7 @@ export async function middleware(request: NextRequest) {
   // Content Security Policy
   const cspDirectives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval'", // Next.js requires unsafe-eval in dev mode
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js requires inline scripts and eval
     "style-src 'self' 'unsafe-inline'", // MUI uses inline styles
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
@@ -218,11 +227,6 @@ export async function middleware(request: NextRequest) {
     "worker-src 'self' blob:",
     "manifest-src 'self'",
   ];
-
-  // In production, remove unsafe-eval
-  if (process.env.NODE_ENV === 'production') {
-    cspDirectives[1] = "script-src 'self'";
-  }
 
   response.headers.set('Content-Security-Policy', cspDirectives.join('; '));
 

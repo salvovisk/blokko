@@ -156,9 +156,9 @@ export default function SaveTemplateModal({ open, onClose, onSave }: SaveTemplat
           <div
             style={{
               padding: '12px',
-              border: '3px solid #DC2626',
-              background: '#FEF2F2',
-              color: '#DC2626',
+              border: '3px solid #D00000',
+              background: '#FFFFFF',
+              color: '#D00000',
               fontSize: '13px',
               fontWeight: 600,
               marginBottom: '20px',
@@ -206,8 +206,8 @@ export default function SaveTemplateModal({ open, onClose, onSave }: SaveTemplat
             disabled={loading}
             style={{
               padding: '12px 24px',
-              border: '3px solid #10B981',
-              background: loading ? '#F5F5F5' : '#10B981',
+              border: '3px solid #000000',
+              background: loading ? '#F5F5F5' : '#000000',
               color: loading ? '#666' : '#FFFFFF',
               fontSize: '13px',
               fontWeight: 700,
@@ -218,12 +218,12 @@ export default function SaveTemplateModal({ open, onClose, onSave }: SaveTemplat
             }}
             onMouseEnter={(e) => {
               if (!loading) {
-                e.currentTarget.style.background = '#059669';
+                e.currentTarget.style.background = '#666666';
               }
             }}
             onMouseLeave={(e) => {
               if (!loading) {
-                e.currentTarget.style.background = '#10B981';
+                e.currentTarget.style.background = '#000000';
               }
             }}
           >

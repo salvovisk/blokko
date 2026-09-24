@@ -131,15 +131,17 @@ export default function DashboardSidebar() {
         <button
           onClick={() => setMobileOpen(true)}
           aria-label="Open navigation menu"
+          data-surface="dark"
           style={{
+            // Sits inside the black header bar, left of the wordmark
             position: 'fixed',
-            top: '80px',
-            left: '16px',
+            top: '12px',
+            left: '12px',
             zIndex: 999,
-            width: '48px',
-            height: '48px',
+            width: '44px',
+            height: '44px',
             background: '#000',
-            border: '3px solid #000',
+            border: '2px solid #FFF',
             color: '#FFF',
             fontSize: '20px',
             cursor: 'pointer',
@@ -147,7 +149,6 @@ export default function DashboardSidebar() {
             alignItems: 'center',
             justifyContent: 'center',
             transition: 'all 0.2s ease-in-out',
-            boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.2)',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = '#FFF';
@@ -158,26 +159,29 @@ export default function DashboardSidebar() {
             e.currentTarget.style.color = '#FFF';
           }}
         >
-          ☰
+          <svg width="1em" height="1em" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+            <rect x="4" y="6" width="24" height="4" />
+            <rect x="4" y="14" width="24" height="4" />
+            <rect x="4" y="22" width="24" height="4" />
+          </svg>
         </button>
       )}
 
       <nav
         aria-label="Main navigation"
+        data-surface="dark"
         style={{
           width: isMobile ? EXPANDED_WIDTH : (isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH),
           height: isMobile ? '100vh' : undefined,
           alignSelf: isMobile ? undefined : 'stretch',
           background: '#000',
           color: '#FFF',
-          borderRight: '3px solid #000',
           display: isMobile && !mobileOpen ? 'none' : 'flex',
           flexDirection: 'column',
           position: isMobile ? 'fixed' : 'sticky',
           top: 0,
           left: 0,
           zIndex: 999,
-          transition: 'width 0.2s ease-in-out',
           flexShrink: 0,
           transform: isMobile && mobileOpen ? 'translateX(0)' : isMobile ? 'translateX(-100%)' : 'translateX(0)',
           animation: isMobile && mobileOpen ? 'slideIn 0.3s ease-in-out' : 'none',
@@ -260,7 +264,7 @@ export default function DashboardSidebar() {
                     color: '#000000',
                     border: '3px solid #000000',
                     padding: '12px',
-                    boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.3)',
+                    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.25)',
                     maxWidth: '240px',
                   },
                 },

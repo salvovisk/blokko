@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { readJson } from '@/lib/api-utils';
 import { updateTemplateSchema, validateRequest } from '@/lib/validations';
 
 // GET /api/templates/[id] - Get single template
@@ -89,7 +90,9 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const body = await req.json();
+    const parsedBody = await readJson(req);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.body;
 
     // Validate input with Zod
     const validation = validateRequest(updateTemplateSchema, {

@@ -29,7 +29,7 @@ export default function SettingsPage() {
     }
 
     if (name.length > 100) {
-      showMessage('error', 'Name must be 100 characters or less');
+      showMessage('error', t.dashboard.settings.messages.nameTooLong);
       return;
     }
 
@@ -67,12 +67,12 @@ export default function SettingsPage() {
     }
 
     if (newPassword.length < 8) {
-      showMessage('error', 'Password must be at least 8 characters');
+      showMessage('error', t.dashboard.settings.messages.passwordLength);
       return;
     }
 
     if (!/[a-z]/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
-      showMessage('error', 'Password must contain uppercase, lowercase, and number');
+      showMessage('error', t.dashboard.settings.messages.passwordPolicy);
       return;
     }
 
@@ -115,13 +115,14 @@ export default function SettingsPage() {
       {/* Success/Error Message */}
       {message && (
         <div
+          role={message.type === 'error' ? 'alert' : 'status'}
           style={{
             position: 'fixed',
-            top: '20px',
+            top: '88px',
             left: '50%',
             transform: 'translateX(-50%)',
             padding: '16px 32px',
-            backgroundColor: message.type === 'success' ? '#10B981' : '#EF4444',
+            backgroundColor: message.type === 'success' ? '#000000' : '#D00000',
             color: '#FFFFFF',
             fontWeight: 700,
             textAlign: 'center',
@@ -130,7 +131,7 @@ export default function SettingsPage() {
             letterSpacing: '0.05em',
             zIndex: 10000,
             border: '3px solid #000000',
-            boxShadow: '8px 8px 0 0 rgba(0, 0, 0, 0.3)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
             minWidth: '300px',
           }}
         >
@@ -202,10 +203,11 @@ export default function SettingsPage() {
         </h2>
 
         <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <label htmlFor="settings-email" style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
             {t.dashboard.settings.profile.emailLabel}
           </label>
           <input
+            id="settings-email"
             type="email"
             value={session?.user?.email || ''}
             disabled
@@ -222,10 +224,11 @@ export default function SettingsPage() {
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <label htmlFor="settings-name" style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
             {t.dashboard.settings.profile.nameLabel}
           </label>
           <input
+            id="settings-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -280,10 +283,11 @@ export default function SettingsPage() {
         </h2>
 
         <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <label htmlFor="settings-current-password" style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
             {t.dashboard.settings.password.currentLabel}
           </label>
           <input
+            id="settings-current-password"
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
@@ -300,10 +304,11 @@ export default function SettingsPage() {
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <label htmlFor="settings-new-password" style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
             {t.dashboard.settings.password.newLabel}
           </label>
           <input
+            id="settings-new-password"
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
@@ -320,10 +325,11 @@ export default function SettingsPage() {
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <label htmlFor="settings-confirm-password" style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
             {t.dashboard.settings.password.confirmLabel}
           </label>
           <input
+            id="settings-confirm-password"
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -344,9 +350,9 @@ export default function SettingsPage() {
           disabled={isChangingPassword}
           style={{
             padding: '12px 24px',
-            background: isChangingPassword ? '#666' : '#DC2626',
+            background: isChangingPassword ? '#666' : '#D00000',
             color: '#FFF',
-            border: '3px solid #DC2626',
+            border: '3px solid #D00000',
             fontSize: '13px',
             fontWeight: 700,
             letterSpacing: '0.05em',
@@ -357,12 +363,12 @@ export default function SettingsPage() {
           onMouseEnter={(e) => {
             if (!isChangingPassword) {
               e.currentTarget.style.background = '#FFF';
-              e.currentTarget.style.color = '#DC2626';
+              e.currentTarget.style.color = '#D00000';
             }
           }}
           onMouseLeave={(e) => {
             if (!isChangingPassword) {
-              e.currentTarget.style.background = '#DC2626';
+              e.currentTarget.style.background = '#D00000';
               e.currentTarget.style.color = '#FFF';
             }
           }}

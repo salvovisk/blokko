@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { parsePagination, readJson } from '@/lib/api-utils';
 import { createTemplateSchema, validateRequest } from '@/lib/validations';
 
 // GET /api/templates - List user's templates + system templates
@@ -30,9 +31,7 @@ export async function GET(req: NextRequest) {
 
     // Pagination parameters
     const { searchParams } = req.nextUrl;
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100); // Max 100 per page
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parsePagination(searchParams);
 
     const where = {
       OR: [
@@ -103,7 +102,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
+    const parsedBody = await readJson(req);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.body;
 
     // Validate input with Zod
     const validation = validateRequest(createTemplateSchema, {

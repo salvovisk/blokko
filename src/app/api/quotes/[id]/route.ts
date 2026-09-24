@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { readJson } from '@/lib/api-utils';
 import { updateQuoteSchema, validateRequest } from '@/lib/validations';
 
 // GET /api/quotes/[id] - Get quote by ID
@@ -46,11 +47,13 @@ export async function GET(
       );
     }
 
+    // Never send the owner record back to the client
+    const { user: _owner, ...publicQuote } = quote;
     try {
-      return NextResponse.json({ ...quote, blocks: JSON.parse(quote.content) }, { status: 200 });
+      return NextResponse.json({ ...publicQuote, blocks: JSON.parse(quote.content) }, { status: 200 });
     } catch (e) {
       console.error(`Failed to parse quote ${quote.id}:`, e);
-      return NextResponse.json({ ...quote, blocks: [] }, { status: 200 });
+      return NextResponse.json({ ...publicQuote, blocks: [] }, { status: 200 });
     }
   } catch (error) {
     console.error('Error fetching quote:', error);
@@ -103,7 +106,9 @@ export async function PUT(
       );
     }
 
-    const body = await req.json();
+    const parsedBody = await readJson(req);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.body;
 
     // Validate input with Zod
     const validation = validateRequest(updateQuoteSchema, {

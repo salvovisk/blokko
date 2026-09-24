@@ -32,18 +32,18 @@ export default function LoadingSkeleton({ type = 'cards', rows = 3 }: LoadingSke
             }}
           >
             <div style={{ flex: 1 }}>
-              <div style={{ height: '16px', width: '60%', background: '#E5E7EB', marginBottom: '8px' }} />
-              <div style={{ height: '12px', width: '40%', background: '#F3F4F6' }} />
+              <div style={{ height: '16px', width: '60%', background: '#CCCCCC', marginBottom: '8px' }} />
+              <div style={{ height: '12px', width: '40%', background: '#F0F0F0' }} />
             </div>
             <div style={{ width: '150px' }}>
-              <div style={{ height: '24px', width: '80px', background: '#F3F4F6' }} />
+              <div style={{ height: '24px', width: '80px', background: '#F0F0F0' }} />
             </div>
             <div style={{ width: '180px' }}>
-              <div style={{ height: '14px', width: '100px', background: '#E5E7EB' }} />
+              <div style={{ height: '14px', width: '100px', background: '#CCCCCC' }} />
             </div>
             <div style={{ width: '200px', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <div style={{ height: '32px', width: '60px', background: '#F3F4F6', border: '2px solid #E5E7EB' }} />
-              <div style={{ height: '32px', width: '70px', background: '#F3F4F6', border: '2px solid #E5E7EB' }} />
+              <div style={{ height: '32px', width: '60px', background: '#F0F0F0', border: '2px solid #CCCCCC' }} />
+              <div style={{ height: '32px', width: '70px', background: '#F0F0F0', border: '2px solid #CCCCCC' }} />
             </div>
           </div>
         ))}
@@ -73,16 +73,16 @@ export default function LoadingSkeleton({ type = 'cards', rows = 3 }: LoadingSke
             }}
           >
             <div style={{ marginBottom: '16px' }}>
-              <div style={{ height: '20px', width: '70%', background: '#E5E7EB', marginBottom: '12px' }} />
-              <div style={{ height: '14px', width: '50%', background: '#F3F4F6' }} />
+              <div style={{ height: '20px', width: '70%', background: '#CCCCCC', marginBottom: '12px' }} />
+              <div style={{ height: '14px', width: '50%', background: '#F0F0F0' }} />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <div style={{ height: '24px', width: '80px', background: '#F3F4F6' }} />
-              <div style={{ height: '14px', width: '100px', background: '#E5E7EB' }} />
+              <div style={{ height: '24px', width: '80px', background: '#F0F0F0' }} />
+              <div style={{ height: '14px', width: '100px', background: '#CCCCCC' }} />
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <div style={{ flex: 1, height: '40px', background: '#F3F4F6', border: '2px solid #E5E7EB' }} />
-              <div style={{ flex: 1, height: '40px', background: '#F3F4F6', border: '2px solid #E5E7EB' }} />
+              <div style={{ flex: 1, height: '40px', background: '#F0F0F0', border: '2px solid #CCCCCC' }} />
+              <div style={{ flex: 1, height: '40px', background: '#F0F0F0', border: '2px solid #CCCCCC' }} />
             </div>
           </div>
         ))}
@@ -109,8 +109,8 @@ export default function LoadingSkeleton({ type = 'cards', rows = 3 }: LoadingSke
             animationDelay: `${index * 0.1}s`,
           }}
         >
-          <div style={{ height: '12px', width: '120px', background: '#E5E7EB', marginBottom: '8px' }} />
-          <div style={{ height: '44px', width: '100%', background: '#F3F4F6', border: '3px solid #E5E7EB' }} />
+          <div style={{ height: '12px', width: '120px', background: '#CCCCCC', marginBottom: '8px' }} />
+          <div style={{ height: '44px', width: '100%', background: '#F0F0F0', border: '3px solid #CCCCCC' }} />
         </div>
       ))}
 

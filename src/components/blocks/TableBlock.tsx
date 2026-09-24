@@ -1,25 +1,20 @@
 'use client';
 
 import { useCallback } from 'react';
-import type { TableBlock as TableBlockType, SaveState } from '@/types/blocks';
+import type { TableBlock as TableBlockType } from '@/types/blocks';
 import { useBuilderStore } from '@/stores/builder-store';
+import { blockFrameBorder } from './blockFrame';
+import { CloseIcon } from '@/components/icons/GeometricIcons';
 
 interface TableBlockProps {
   block: TableBlockType;
   isActive: boolean;
 }
 
-const SAVE_STATE_COLORS: Record<SaveState, string> = {
-  idle: 'transparent',
-  saving: '#FFD700',
-  saved: '#00DD00',
-  error: '#FF0000',
-};
 
 export default function TableBlock({ block, isActive }: TableBlockProps) {
   const updateBlockWithAutoSave = useBuilderStore((state) => state.updateBlockWithAutoSave);
   const saveState = block.saveState || 'idle';
-  const accentColor = SAVE_STATE_COLORS[saveState];
 
   const handleChange = useCallback(
     (field: keyof TableBlockType['data'], value: any) => {
@@ -77,17 +72,11 @@ export default function TableBlock({ block, isActive }: TableBlockProps) {
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
-    border: isActive ? '4px solid #000' : '2px solid #000',
+    border: blockFrameBorder(saveState, isActive),
     padding: '32px',
     backgroundColor: isActive ? '#f5f5f5' : '#fff',
     fontFamily: 'monospace',
     transition: 'all 0.2s ease',
-    borderLeft:
-      accentColor !== 'transparent'
-        ? `4px solid ${accentColor}`
-        : isActive
-        ? '4px solid #000'
-        : '2px solid #000',
     animation:
       saveState === 'error'
         ? 'shake 0.3s'
@@ -157,7 +146,7 @@ export default function TableBlock({ block, isActive }: TableBlockProps) {
           }
         `}
       </style>
-      <div style={containerStyle}>
+      <div className="quote-block" style={containerStyle}>
         {/* Title */}
         <div style={{ marginBottom: '24px' }}>
           <label style={labelStyle}>Table Title</label>
@@ -254,17 +243,21 @@ export default function TableBlock({ block, isActive }: TableBlockProps) {
                       </button>
                       {block.data.headers.length > 1 && (
                         <button
+                          type="button"
+                          aria-label="Remove column"
                           onClick={() => removeColumn(index)}
                           style={{
                             ...buttonStyle,
                             padding: '4px 8px',
                             fontSize: '10px',
-                            backgroundColor: '#DC2626',
+                            backgroundColor: '#D00000',
                             color: '#fff',
                             marginRight: 0,
+                            display: 'flex',
+                            alignItems: 'center',
                           }}
                         >
-                          ×
+                          <CloseIcon />
                         </button>
                       )}
                     </div>
@@ -323,14 +316,14 @@ export default function TableBlock({ block, isActive }: TableBlockProps) {
               onClick={() => removeRow(block.data.rows.length - 1)}
               style={{
                 ...buttonStyle,
-                backgroundColor: '#DC2626',
+                backgroundColor: '#D00000',
                 color: '#fff',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#991B1B';
+                e.currentTarget.style.backgroundColor = '#000000';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#DC2626';
+                e.currentTarget.style.backgroundColor = '#D00000';
               }}
             >
               - Remove Last Row

@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import type { Template } from '@/types/blocks';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { TemplatesIcon } from '@/components/icons/GeometricIcons';
 
 interface TemplatesTableProps {
   templates: Template[];
@@ -103,9 +104,9 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
   if (templates.length === 0) {
     return (
       <div style={{ border: '3px dashed #CCC', padding: '60px', textAlign: 'center', background: '#FAFAFA' }}>
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+        <div aria-hidden="true" style={{ fontSize: '48px', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}><TemplatesIcon /></div>
         <p style={{ fontSize: '16px', color: '#666' }}>
-          No templates yet. Save your first quote as a template.
+          {t.dashboard.templates.emptyDescription}
         </p>
       </div>
     );
@@ -129,6 +130,7 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                 <input
                   type="text"
                   value={renameValue}
+                  aria-label={t.dashboard.templates.actions.rename}
                   onChange={(e) => setRenameValue(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') saveRename(template.id);
@@ -139,7 +141,7 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                   style={{
                     width: '100%',
                     padding: '8px',
-                    border: '2px solid #10B981',
+                    border: '2px solid #000000',
                     fontSize: '16px',
                     fontWeight: 700,
                     textTransform: 'uppercase',
@@ -164,9 +166,9 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                 style={{
                   display: 'inline-block',
                   padding: '4px 12px',
-                  border: `2px solid ${template.isSystem ? '#2563EB' : '#666'}`,
-                  background: template.isSystem ? '#EFF6FF' : '#F5F5F5',
-                  color: template.isSystem ? '#2563EB' : '#666',
+                  border: `2px solid ${template.isSystem ? '#000000' : '#666'}`,
+                  background: template.isSystem ? '#FFFFFF' : '#F5F5F5',
+                  color: template.isSystem ? '#000000' : '#666',
                   fontSize: '11px',
                   fontWeight: 700,
                   letterSpacing: '0.1em',
@@ -189,8 +191,8 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                 style={{
                   flex: 1,
                   padding: '12px',
-                  background: '#10B981',
-                  border: '2px solid #10B981',
+                  background: '#000000',
+                  border: '2px solid #000000',
                   color: '#FFF',
                   fontSize: '11px',
                   fontWeight: 700,
@@ -200,10 +202,10 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                   transition: 'all 0.2s ease-in-out',
                 }}
                 onTouchStart={(e) => {
-                  e.currentTarget.style.background = '#059669';
+                  e.currentTarget.style.background = '#666666';
                 }}
                 onTouchEnd={(e) => {
-                  e.currentTarget.style.background = '#10B981';
+                  e.currentTarget.style.background = '#000000';
                 }}
               >
                 {t.dashboard.templates.actions.use}
@@ -242,8 +244,8 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                       flex: 1,
                       padding: '12px',
                       background: '#FFF',
-                      border: '2px solid #DC2626',
-                      color: '#DC2626',
+                      border: '2px solid #D00000',
+                      color: '#D00000',
                       fontSize: '11px',
                       fontWeight: 700,
                       letterSpacing: '0.1em',
@@ -252,12 +254,12 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                       transition: 'all 0.2s ease-in-out',
                     }}
                     onTouchStart={(e) => {
-                      e.currentTarget.style.background = '#DC2626';
+                      e.currentTarget.style.background = '#D00000';
                       e.currentTarget.style.color = '#FFF';
                     }}
                     onTouchEnd={(e) => {
                       e.currentTarget.style.background = '#FFF';
-                      e.currentTarget.style.color = '#DC2626';
+                      e.currentTarget.style.color = '#D00000';
                     }}
                   >
                     {t.dashboard.templates.actions.delete}
@@ -402,6 +404,7 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                   <input
                     type="text"
                     value={renameValue}
+                  aria-label={t.dashboard.templates.actions.rename}
                     onChange={(e) => setRenameValue(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') saveRename(template.id);
@@ -412,7 +415,7 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                     style={{
                       width: '100%',
                       padding: '8px',
-                      border: '2px solid #10B981',
+                      border: '2px solid #000000',
                       fontSize: '14px',
                       fontWeight: 600,
                       fontFamily: 'inherit',
@@ -448,9 +451,9 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                   style={{
                     display: 'inline-block',
                     padding: '4px 12px',
-                    border: `2px solid ${template.isSystem ? '#2563EB' : '#666'}`,
-                    background: template.isSystem ? '#EFF6FF' : '#F5F5F5',
-                    color: template.isSystem ? '#2563EB' : '#666',
+                    border: `2px solid ${template.isSystem ? '#000000' : '#666'}`,
+                    background: template.isSystem ? '#FFFFFF' : '#F5F5F5',
+                    color: template.isSystem ? '#000000' : '#666',
                     fontSize: '11px',
                     fontWeight: 700,
                     letterSpacing: '0.1em',
@@ -473,8 +476,8 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                     onClick={() => onUse(template.id)}
                     style={{
                       padding: '8px 16px',
-                      background: '#10B981',
-                      border: '2px solid #10B981',
+                      background: '#000000',
+                      border: '2px solid #000000',
                       color: '#FFF',
                       fontSize: '11px',
                       fontWeight: 700,
@@ -484,12 +487,12 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                       transition: 'all 0.2s ease-in-out',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#059669';
-                      e.currentTarget.style.borderColor = '#059669';
+                      e.currentTarget.style.background = '#666666';
+                      e.currentTarget.style.borderColor = '#666666';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#10B981';
-                      e.currentTarget.style.borderColor = '#10B981';
+                      e.currentTarget.style.background = '#000000';
+                      e.currentTarget.style.borderColor = '#000000';
                     }}
                   >
                     {t.dashboard.templates.actions.use}
@@ -526,8 +529,8 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                         style={{
                           padding: '8px 16px',
                           background: '#FFF',
-                          border: '2px solid #DC2626',
-                          color: '#DC2626',
+                          border: '2px solid #D00000',
+                          color: '#D00000',
                           fontSize: '11px',
                           fontWeight: 700,
                           letterSpacing: '0.1em',
@@ -536,12 +539,12 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                           transition: 'all 0.2s ease-in-out',
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = '#DC2626';
+                          e.currentTarget.style.background = '#D00000';
                           e.currentTarget.style.color = '#FFF';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = '#FFF';
-                          e.currentTarget.style.color = '#DC2626';
+                          e.currentTarget.style.color = '#D00000';
                         }}
                       >
                         {t.dashboard.templates.actions.delete}

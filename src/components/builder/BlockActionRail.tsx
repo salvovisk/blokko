@@ -7,6 +7,8 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useModifierKey } from '@/hooks/useModifierKey';
 
 interface BlockActionRailProps {
   blockId: string;
@@ -30,11 +32,15 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
   onMoveDown,
   isDragging = false,
 }) => {
+  const { t } = useLanguage();
+  const mod = useModifierKey();
+  const rail = t.builder.rail;
   const canMoveUp = blockIndex > 0;
   const canMoveDown = blockIndex < totalBlocks - 1;
 
   return (
     <Box
+      className="block-action-rail"
       sx={{
         position: 'absolute',
         left: '0',
@@ -55,7 +61,7 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
       }}
     >
       {/* Drag Handle */}
-      <Tooltip title="Drag to reorder" placement="left">
+      <Tooltip title={rail.drag} placement="left">
         <Box
           sx={{
             cursor: 'grab',
@@ -64,12 +70,12 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
             justifyContent: 'center',
             width: '32px',
             height: '32px',
-            borderRadius: '4px',
+            borderRadius: 0,
             backgroundColor: '#FFFFFF',
             border: '2px solid #000000',
             '&:hover': {
-              backgroundColor: '#F5F5F5',
-              borderWidth: '3px',
+              backgroundColor: '#000000',
+              '& svg': { color: '#FFFFFF !important' },
             },
             '&:active': {
               cursor: 'grabbing',
@@ -81,7 +87,7 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
       </Tooltip>
 
       {/* Move Up */}
-      <Tooltip title="Move up (⌘↑)" placement="left">
+      <Tooltip title={`${rail.moveUp} (${mod}↑)`} placement="left">
         <span>
           <IconButton
             onClick={onMoveUp}
@@ -92,10 +98,10 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
               padding: 0,
               backgroundColor: '#FFFFFF',
               border: '2px solid #000000',
-              borderRadius: '4px',
+              borderRadius: 0,
               '&:hover': {
-                backgroundColor: '#F5F5F5',
-                borderWidth: '3px',
+                backgroundColor: '#000000',
+                '& svg': { color: '#FFFFFF !important' },
               },
               '&:disabled': {
                 opacity: 0.3,
@@ -109,7 +115,7 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
       </Tooltip>
 
       {/* Move Down */}
-      <Tooltip title="Move down (⌘↓)" placement="left">
+      <Tooltip title={`${rail.moveDown} (${mod}↓)`} placement="left">
         <span>
           <IconButton
             onClick={onMoveDown}
@@ -120,10 +126,10 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
               padding: 0,
               backgroundColor: '#FFFFFF',
               border: '2px solid #000000',
-              borderRadius: '4px',
+              borderRadius: 0,
               '&:hover': {
-                backgroundColor: '#F5F5F5',
-                borderWidth: '3px',
+                backgroundColor: '#000000',
+                '& svg': { color: '#FFFFFF !important' },
               },
               '&:disabled': {
                 opacity: 0.3,
@@ -137,7 +143,7 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
       </Tooltip>
 
       {/* Duplicate */}
-      <Tooltip title="Duplicate (⌘D)" placement="left">
+      <Tooltip title={`${t.builder.shortcuts.duplicate} (${mod}D)`} placement="left">
         <IconButton
           onClick={onDuplicate}
           sx={{
@@ -146,10 +152,10 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
             padding: 0,
             backgroundColor: '#FFFFFF',
             border: '2px solid #000000',
-            borderRadius: '4px',
+            borderRadius: 0,
             '&:hover': {
-              backgroundColor: '#F5F5F5',
-              borderWidth: '3px',
+              backgroundColor: '#000000',
+              '& svg': { color: '#FFFFFF !important' },
             },
           }}
         >
@@ -158,7 +164,7 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
       </Tooltip>
 
       {/* Delete */}
-      <Tooltip title="Delete (⌘⌫)" placement="left">
+      <Tooltip title={`${t.builder.shortcuts.delete} (${mod}⌫)`} placement="left">
         <IconButton
           onClick={onDelete}
           sx={{
@@ -166,15 +172,15 @@ export const BlockActionRail: React.FC<BlockActionRailProps> = ({
             height: '32px',
             padding: 0,
             backgroundColor: '#FFFFFF',
-            border: '2px solid #FF0000',
-            borderRadius: '4px',
+            border: '2px solid #D00000',
+            borderRadius: 0,
             '&:hover': {
-              backgroundColor: '#FFF5F5',
-              borderWidth: '3px',
+              backgroundColor: '#D00000',
+              '& svg': { color: '#FFFFFF !important' },
             },
           }}
         >
-          <DeleteOutlineIcon sx={{ fontSize: '16px', color: '#FF0000' }} />
+          <DeleteOutlineIcon sx={{ fontSize: '16px', color: '#D00000' }} />
         </IconButton>
       </Tooltip>
     </Box>
