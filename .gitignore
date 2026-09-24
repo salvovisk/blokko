@@ -37,3 +37,12 @@ next-env.d.ts
 prisma/migrations/
 prisma/*.db
 prisma/*.db-journal
+
+# test artifacts
+tests/.tmp/
+test-results/
+playwright-report/
+e2e/.auth/
+
+# local design tool state
+.impeccable/
