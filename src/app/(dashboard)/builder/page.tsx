@@ -13,7 +13,7 @@ import {
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useBuilderStore } from '@/stores/builder-store';
+import { useBuilderStore, serializeBlocks } from '@/stores/builder-store';
 import { BlockType } from '@/types/blocks';
 import BuilderSidebar from '@/components/builder/BuilderSidebar';
 import BuilderCanvas from '@/components/builder/BuilderCanvas';
@@ -31,8 +31,20 @@ import { generatePDF, downloadPDF, getPDFDataURL } from '@/lib/pdf-generator';
 export default function BuilderPage() {
   const { t } = useLanguage();
   const { token: csrfToken } = useCsrf();
-  const { blocks, addBlock, moveBlock, quoteTitle, quoteId, loadQuote, saveAsTemplate, undo, redo, lastRemoval } =
-    useBuilderStore();
+  const {
+    blocks,
+    addBlock,
+    moveBlock,
+    quoteTitle,
+    quoteId,
+    loadQuote,
+    saveAsTemplate,
+    undo,
+    redo,
+    lastRemoval,
+    startNewQuote,
+    markSaved,
+  } = useBuilderStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -132,6 +144,13 @@ export default function BuilderPage() {
   // Load quote from URL param on mount
   useEffect(() => {
     const id = searchParams.get('id');
+    if (searchParams.get('new') !== null) {
+      // "New quote": start blank instead of showing whatever was last open
+      startNewQuote();
+      setQuoteStatus(null);
+      router.replace('/builder', { scroll: false });
+      return;
+    }
     if (id && id !== quoteId) {
       loadQuoteFromAPI(id);
     } else if (id && quoteStatus === null) {
@@ -168,7 +187,7 @@ export default function BuilderPage() {
     try {
       const payload = {
         title: quoteTitle,
-        blocks: blocks,
+        blocks: serializeBlocks(blocks),
       };
 
       let response;
@@ -196,7 +215,8 @@ export default function BuilderPage() {
 
       // Update store with saved quote ID
       if (!quoteId) {
-        loadQuote(savedQuote.id, savedQuote.title, savedQuote.blocks);
+        // Keep the blocks and undo history the user is working with
+        markSaved(savedQuote.id);
         setQuoteStatus(savedQuote.status ?? 'draft');
         // Update URL with quote ID without navigation
         router.replace(`/builder?id=${savedQuote.id}`, { scroll: false });
@@ -265,7 +285,7 @@ export default function BuilderPage() {
   };
 
   const handleSaveAsTemplate = async (name: string, description?: string) => {
-    const result = await saveAsTemplate(name, description);
+    const result = await saveAsTemplate(name, description, csrfToken);
 
     if (result.success) {
       showToast(t.builder.messages.templateSaved, 'success');

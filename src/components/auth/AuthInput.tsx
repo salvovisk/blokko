@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 
 interface AuthInputProps {
   label: string;
@@ -35,6 +35,8 @@ export default function AuthInput({
   helperText,
   disabled,
 }: AuthInputProps) {
+  const inputId = useId();
+  const errorId = `${inputId}-error`;
   const [isFocused, setIsFocused] = useState(false);
   const [showError, setShowError] = useState(false);
 
@@ -64,6 +66,7 @@ export default function AuthInput({
     <div style={{ marginBottom: '28px', position: 'relative' }}>
       {/* Label */}
       <label
+        htmlFor={inputId}
         style={{
           display: 'block',
           fontSize: '10px',
@@ -84,6 +87,9 @@ export default function AuthInput({
       {/* Input Container */}
       <div style={{ position: 'relative' }}>
         <input
+          id={inputId}
+          aria-invalid={showError || undefined}
+          aria-describedby={showError ? errorId : undefined}
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -170,6 +176,8 @@ export default function AuthInput({
       {/* Error Message */}
       {showError && error && (
         <div
+          id={errorId}
+          role="alert"
           style={{
             marginTop: '10px',
             padding: '12px 14px',

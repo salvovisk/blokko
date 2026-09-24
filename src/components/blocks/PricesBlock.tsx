@@ -6,6 +6,19 @@ import type { PricesBlock as PricesBlockType, PriceItem } from '@/types/blocks';
 import { useBuilderStore } from '@/stores/builder-store';
 import { blockFrameBorder } from './blockFrame';
 
+/** Round to whole cents so line totals, tax and grand total always add up. */
+export const toCents = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
+
+/** Money inputs: empty or junk becomes 0, negatives are not allowed. */
+const parseAmount = (raw: string) => Math.max(0, parseFloat(raw) || 0);
+
+export function computeTotals(items: PriceItem[], taxRate: number, showTax: boolean) {
+  const subtotal = toCents(items.reduce((sum, item) => sum + item.total, 0));
+  const tax = toCents(subtotal * (taxRate / 100));
+  const total = toCents(subtotal + (showTax ? tax : 0));
+  return { subtotal, tax, total };
+}
+
 interface PricesBlockProps {
   block: PricesBlockType;
   isActive: boolean;
@@ -23,23 +36,16 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
           const updated = { ...item, [field]: value };
           // Auto-calculate total
           if (field === 'quantity' || field === 'price') {
-            updated.total = updated.quantity * updated.price;
+            updated.total = toCents(updated.quantity * updated.price);
           }
           return updated;
         }
         return item;
       });
 
-      // Recalculate totals
-      const subtotal = updatedItems.reduce((sum, item) => sum + item.total, 0);
-      const tax = subtotal * (block.data.taxRate / 100);
-      const total = subtotal + (block.data.showTax ? tax : 0);
-
       updateBlockWithAutoSave(block.id, {
         items: updatedItems,
-        subtotal,
-        tax,
-        total,
+        ...computeTotals(updatedItems, block.data.taxRate, block.data.showTax),
       });
     },
     [block.id, block.data.items, block.data.taxRate, block.data.showTax, updateBlockWithAutoSave]
@@ -62,15 +68,9 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
   const removeRow = useCallback(
     (itemId: string) => {
       const updatedItems = block.data.items.filter((item) => item.id !== itemId);
-      const subtotal = updatedItems.reduce((sum, item) => sum + item.total, 0);
-      const tax = subtotal * (block.data.taxRate / 100);
-      const total = subtotal + (block.data.showTax ? tax : 0);
-
       updateBlockWithAutoSave(block.id, {
         items: updatedItems,
-        subtotal,
-        tax,
-        total,
+        ...computeTotals(updatedItems, block.data.taxRate, block.data.showTax),
       });
     },
     [block.id, block.data.items, block.data.taxRate, block.data.showTax, updateBlockWithAutoSave]
@@ -85,27 +85,21 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
 
   const handleTaxRateChange = useCallback(
     (taxRate: number) => {
-      const tax = block.data.subtotal * (taxRate / 100);
-      const total = block.data.subtotal + (block.data.showTax ? tax : 0);
-
       updateBlockWithAutoSave(block.id, {
         taxRate,
-        tax,
-        total,
+        ...computeTotals(block.data.items, taxRate, block.data.showTax),
       });
     },
-    [block.id, block.data.subtotal, block.data.showTax, updateBlockWithAutoSave]
+    [block.id, block.data.items, block.data.showTax, updateBlockWithAutoSave]
   );
 
   const toggleShowTax = useCallback(() => {
     const showTax = !block.data.showTax;
-    const total = block.data.subtotal + (showTax ? block.data.tax : 0);
-
     updateBlockWithAutoSave(block.id, {
       showTax,
-      total,
+      ...computeTotals(block.data.items, block.data.taxRate, showTax),
     });
-  }, [block.id, block.data.subtotal, block.data.tax, block.data.showTax, updateBlockWithAutoSave]);
+  }, [block.id, block.data.items, block.data.taxRate, block.data.showTax, updateBlockWithAutoSave]);
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
@@ -271,13 +265,15 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
                   onChange={(e) => handleItemChange(item.id, 'description', e.target.value)}
                   style={inputStyle}
                   placeholder="Item description"
+                  aria-label="Item description"
                 />
               </td>
               <td style={tdStyle}>
                 <input
                   type="number"
                   value={item.quantity}
-                  onChange={(e) => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                  onChange={(e) => handleItemChange(item.id, 'quantity', parseAmount(e.target.value))}
+                  aria-label="Quantity"
                   style={inputStyle}
                   min="0"
                   step="0.5"
@@ -287,7 +283,8 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
                 <input
                   type="number"
                   value={item.price}
-                  onChange={(e) => handleItemChange(item.id, 'price', parseFloat(e.target.value) || 0)}
+                  onChange={(e) => handleItemChange(item.id, 'price', parseAmount(e.target.value))}
+                  aria-label="Unit price"
                   style={inputStyle}
                   min="0"
                   step="0.01"
@@ -298,9 +295,11 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
               </td>
               <td style={{ ...tdStyle, textAlign: 'center' }}>
                 <button
+                  type="button"
                   onClick={() => removeRow(item.id)}
                   style={removeButtonStyle}
                   title="Remove row"
+                  aria-label="Remove row"
                 >
                   X
                 </button>
@@ -332,7 +331,7 @@ export default function PricesBlock({ block, isActive }: PricesBlockProps) {
             <input
               type="number"
               value={block.data.taxRate}
-              onChange={(e) => handleTaxRateChange(parseFloat(e.target.value) || 0)}
+              onChange={(e) => handleTaxRateChange(Math.min(100, parseAmount(e.target.value)))}
               style={{ ...inputStyle, width: '60px', border: '1px solid #000', padding: '4px' }}
               min="0"
               max="100"

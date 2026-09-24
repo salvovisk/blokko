@@ -156,7 +156,7 @@ export default function QuotesPage() {
           {t.dashboard.quotes.title}
         </h1>
         <Link
-          href="/builder"
+          href="/builder?new=1"
           style={{
             padding: 'clamp(12px, 3vw, 16px) clamp(24px, 5vw, 32px)',
             background: '#000',
@@ -192,7 +192,7 @@ export default function QuotesPage() {
             {t.dashboard.quotes.emptyDescription}
           </p>
           <Link
-            href="/builder"
+            href="/builder?new=1"
             style={{
               padding: '16px 32px',
               background: '#000',

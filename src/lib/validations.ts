@@ -1,4 +1,20 @@
 import { z } from 'zod';
+import type { BlockType } from '@/types/blocks';
+
+// Every block type the builder can create (keep in sync with BlockType)
+export const BLOCK_TYPES: readonly string[] = [
+  'HEADER',
+  'PRICES',
+  'TEXT',
+  'TERMS',
+  'FAQ',
+  'TABLE',
+  'TIMELINE',
+  'CONTACT',
+  'DISCOUNT',
+  'PAYMENT',
+  'SIGNATURE',
+] satisfies readonly BlockType[];
 
 // Block content validation helper
 function validateBlockContent(content: string): boolean {
@@ -27,7 +43,7 @@ function validateBlockContent(content: string): boolean {
         return false;
       }
       // Validate type is one of the allowed types
-      if (!['HEADER', 'PRICES', 'TEXT', 'TERMS'].includes(block.type)) {
+      if (!BLOCK_TYPES.includes(block.type)) {
         return false;
       }
     }
@@ -41,7 +57,7 @@ function validateBlockContent(content: string): boolean {
 // Auth validations
 export const registerSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
-  email: z.string().email('Invalid email address').toLowerCase().trim(),
+  email: z.string().trim().toLowerCase().email('Invalid email address'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -52,14 +68,14 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address').toLowerCase().trim(),
+  email: z.string().trim().toLowerCase().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 
 // Quote validations
 export const createQuoteSchema = z.object({
   title: z.string().min(1, 'Title is required').max(500, 'Title too long'),
-  description: z.string().max(2000, 'Description too long').optional(),
+  description: z.string().max(2000, 'Description too long').nullish(),
   content: z.string()
     .max(1048576, 'Content too large (max 1MB)')
     .refine(validateBlockContent, 'Invalid block structure'),
@@ -68,7 +84,7 @@ export const createQuoteSchema = z.object({
 
 export const updateQuoteSchema = z.object({
   title: z.string().min(1, 'Title is required').max(500, 'Title too long').optional(),
-  description: z.string().max(2000, 'Description too long').optional(),
+  description: z.string().max(2000, 'Description too long').nullish(),
   content: z.string()
     .max(1048576, 'Content too large')
     .refine(validateBlockContent, 'Invalid block structure')
@@ -79,7 +95,7 @@ export const updateQuoteSchema = z.object({
 // Template validations
 export const createTemplateSchema = z.object({
   name: z.string().min(1, 'Name is required').max(200, 'Name too long'),
-  description: z.string().max(1000, 'Description too long').optional(),
+  description: z.string().max(1000, 'Description too long').nullish(),
   content: z.string()
     .max(1048576, 'Content too large (max 1MB)')
     .refine(validateBlockContent, 'Invalid block structure'),
@@ -87,7 +103,7 @@ export const createTemplateSchema = z.object({
 
 export const updateTemplateSchema = z.object({
   name: z.string().min(1, 'Name is required').max(200, 'Name too long').optional(),
-  description: z.string().max(1000, 'Description too long').optional(),
+  description: z.string().max(1000, 'Description too long').nullish(),
   content: z.string()
     .max(1048576, 'Content too large')
     .refine(validateBlockContent, 'Invalid block structure')

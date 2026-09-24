@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
+import { readJson } from '@/lib/api-utils';
 import { registerSchema, validateRequest } from '@/lib/validations';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const parsedBody = await readJson(request);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.body;
 
     // Validate input with Zod
     const validation = validateRequest(registerSchema, body);

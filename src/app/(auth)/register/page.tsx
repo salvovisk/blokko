@@ -199,6 +199,7 @@ export default function RegisterPage() {
           {/* General Error */}
           {errors.general && (
             <div
+              role="alert"
               style={{
                 padding: '16px 18px',
                 background: '#FFFFFF',

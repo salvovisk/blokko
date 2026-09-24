@@ -106,7 +106,8 @@
       "error": "Invalid email or password",
       "emailRequired": "Email is required",
       "emailInvalid": "Invalid email format",
-      "passwordRequired": "Password is required"
+      "passwordRequired": "Password is required",
+      "registered": "Account created. Log in to start building quotes."
     },
     "register": {
       "title": "Create Account",
@@ -218,7 +219,7 @@
         "currentLabel": "CURRENT PASSWORD",
         "currentPlaceholder": "Enter current password",
         "newLabel": "NEW PASSWORD",
-        "newPlaceholder": "Enter new password (min 6 characters)",
+        "newPlaceholder": "At least 8 characters, with A-Z, a-z and 0-9",
         "confirmLabel": "CONFIRM NEW PASSWORD",
         "confirmPlaceholder": "Confirm new password",
         "changeButton": "CHANGE PASSWORD",
@@ -237,10 +238,12 @@
         "profileFailed": "Failed to update profile",
         "passwordRequired": "All password fields are required",
         "passwordMismatch": "New passwords do not match",
-        "passwordLength": "New password must be at least 6 characters",
+        "passwordLength": "New password must be at least 8 characters",
         "passwordChanged": "Password changed successfully",
         "passwordIncorrect": "Current password is incorrect",
-        "passwordFailed": "Failed to change password"
+        "passwordFailed": "Failed to change password",
+        "passwordPolicy": "New password needs an uppercase letter, a lowercase letter and a number",
+        "nameTooLong": "Name must be 100 characters or less"
       }
     }
   },

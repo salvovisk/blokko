@@ -46,10 +46,14 @@ interface BuilderState {
   setActiveBlock: (id: string | null) => void;
   setQuoteTitle: (title: string) => void;
   loadQuote: (quoteId: string, title: string, blocks: Block[]) => void;
+  /** First save of a new quote: remember its id without touching blocks or history. */
+  markSaved: (quoteId: string) => void;
   clearBuilder: () => void;
+  /** Blank builder for a brand-new quote: no undo toast, fresh history. */
+  startNewQuote: () => void;
   duplicateBlock: (id: string) => void;
   loadTemplate: (templateId: string, templateName: string, blocks: Block[]) => void;
-  saveAsTemplate: (name: string, description?: string) => Promise<{ success: boolean; templateId?: string; error?: string }>;
+  saveAsTemplate: (name: string, description?: string, csrfToken?: string | null) => Promise<{ success: boolean; templateId?: string; error?: string }>;
 }
 
 const createDefaultBlockData = (type: BlockType): Block['data'] => {
@@ -209,6 +213,11 @@ const createDefaultBlockData = (type: BlockType): Block['data'] => {
       return {} as any;
   }
 };
+
+/** Blocks as persisted: without the UI-only save indicator. */
+export function serializeBlocks(blocks: Block[]): Block[] {
+  return blocks.map(({ saveState: _saveState, ...rest }) => rest as Block);
+}
 
 // Debounced auto-save timeout storage
 let autoSaveTimeouts: Record<string, NodeJS.Timeout> = {};
@@ -415,12 +424,16 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     set({
       quoteId,
       quoteTitle: title,
-      blocks,
+      blocks: (blocks || []).map((b) => ({ ...b, saveState: 'idle' as SaveState })),
       activeBlockId: null,
       past: [],
       future: [],
     });
     lastEdit = null;
+  },
+
+  markSaved: (quoteId) => {
+    set({ quoteId });
   },
 
   clearBuilder: () => {
@@ -434,18 +447,35 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     }));
   },
 
+  startNewQuote: () => {
+    lastEdit = null;
+    set({
+      blocks: [],
+      activeBlockId: null,
+      quoteTitle: 'Untitled Quote',
+      quoteId: null,
+      past: [],
+      future: [],
+      lastRemoval: null,
+    });
+  },
+
   duplicateBlock: (id) => {
     const blocks = get().blocks || [];
-    const block = blocks.find((b) => b.id === id);
-    if (block) {
+    const index = blocks.findIndex((b) => b.id === id);
+    if (index !== -1) {
+      const block = blocks[index];
+      // Deep copy so nested lists (items, terms, FAQs) are not shared
       const newBlock = {
         ...block,
+        data: structuredClone(block.data),
         id: nanoid(),
         saveState: 'idle' as SaveState,
-      };
+      } as Block;
       set((state) => ({
         ...recordHistory(state),
-        blocks: [...(state.blocks || []), newBlock],
+        // Place the copy right after the original
+        blocks: [...state.blocks.slice(0, index + 1), newBlock, ...state.blocks.slice(index + 1)],
         activeBlockId: newBlock.id,
       }));
     }
@@ -468,7 +498,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     }));
   },
 
-  saveAsTemplate: async (name, description) => {
+  saveAsTemplate: async (name, description, csrfToken) => {
     const { blocks } = get();
 
     // Validate blocks
@@ -479,11 +509,14 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     try {
       const response = await fetch('/api/templates', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { 'x-csrf-token': csrfToken } : {}),
+        },
         body: JSON.stringify({
           name,
-          description: description || null,
-          blocks,
+          description: description || undefined,
+          blocks: serializeBlocks(blocks),
         }),
       });
 

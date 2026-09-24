@@ -130,6 +130,7 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                 <input
                   type="text"
                   value={renameValue}
+                  aria-label={t.dashboard.templates.actions.rename}
                   onChange={(e) => setRenameValue(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') saveRename(template.id);
@@ -403,6 +404,7 @@ export default function TemplatesTable({ templates, onUse, onRename, onDelete }:
                   <input
                     type="text"
                     value={renameValue}
+                  aria-label={t.dashboard.templates.actions.rename}
                     onChange={(e) => setRenameValue(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') saveRename(template.id);

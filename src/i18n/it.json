@@ -106,7 +106,8 @@
       "error": "Email o password non valide",
       "emailRequired": "L'email è obbligatoria",
       "emailInvalid": "Formato email non valido",
-      "passwordRequired": "La password è obbligatoria"
+      "passwordRequired": "La password è obbligatoria",
+      "registered": "Account creato. Accedi per iniziare a creare preventivi."
     },
     "register": {
       "title": "Crea Account",
@@ -218,7 +219,7 @@
         "currentLabel": "PASSWORD ATTUALE",
         "currentPlaceholder": "Inserisci password attuale",
         "newLabel": "NUOVA PASSWORD",
-        "newPlaceholder": "Inserisci nuova password (min 6 caratteri)",
+        "newPlaceholder": "Almeno 8 caratteri, con A-Z, a-z e 0-9",
         "confirmLabel": "CONFERMA NUOVA PASSWORD",
         "confirmPlaceholder": "Conferma nuova password",
         "changeButton": "CAMBIA PASSWORD",
@@ -237,10 +238,12 @@
         "profileFailed": "Aggiornamento profilo fallito",
         "passwordRequired": "Tutti i campi password sono obbligatori",
         "passwordMismatch": "Le nuove password non corrispondono",
-        "passwordLength": "La nuova password deve essere di almeno 6 caratteri",
+        "passwordLength": "La nuova password deve avere almeno 8 caratteri",
         "passwordChanged": "Password cambiata con successo",
         "passwordIncorrect": "La password attuale non è corretta",
-        "passwordFailed": "Cambio password fallito"
+        "passwordFailed": "Cambio password fallito",
+        "passwordPolicy": "La nuova password richiede una maiuscola, una minuscola e un numero",
+        "nameTooLong": "Il nome deve avere al massimo 100 caratteri"
       }
     }
   },
